@@ -18,28 +18,48 @@ final class SafeImageResolver
     public function snapshot(string $source): ?string
     {
         $path = $this->resolve($source);
-        if ($path === null) { return null; }
-        $handle = @fopen($path, 'rb');
-        if ($handle === false) { return null; }
+        if ($path === null) {
+            return null;
+        }
+
+        $input = @fopen($path, 'rb');
+        if ($input === false) {
+            return null;
+        }
+
         $temporary = tempnam(sys_get_temp_dir(), 'twig_word_image_');
-        if ($temporary === false) { fclose($handle); return null; }
+        if ($temporary === false) {
+            fclose($input);
+            return null;
+        }
+        @chmod($temporary, 0600);
+        $success = false;
         try {
-            $output = fopen($temporary, 'wb');
-            if ($output === false) { return null; }
+            $output = @fopen($temporary, 'wb');
+            if ($output === false) {
+                return null;
+            }
             try {
-                $copied = stream_copy_to_stream($handle, $output, $this->maxBytes + 1);
+                $copied = stream_copy_to_stream($input, $output, $this->maxBytes + 1);
             } finally {
                 fclose($output);
             }
-            if ($copied === false || $copied < 1 || $copied > $this->maxBytes) { return null; }
+            if ($copied === false || $copied < 1 || $copied > $this->maxBytes) {
+                return null;
+            }
             $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($temporary);
-            if (!in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)) { return null; }
+            if (!in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)) {
+                return null;
+            }
             $info = @getimagesize($temporary);
-            if ($info === false || $info[0] < 1 || $info[1] < 1 || $info[0] > 10000 || $info[1] > 10000) { return null; }
+            if ($info === false || $info[0] < 1 || $info[1] < 1 || $info[0] > 10000 || $info[1] > 10000) {
+                return null;
+            }
+            $success = true;
             return $temporary;
         } finally {
-            fclose($handle);
-            if (isset($temporary) && is_file($temporary) && (!isset($copied) || $copied === false || $copied < 1 || $copied > $this->maxBytes || !isset($mime) || !in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true) || !isset($info) || $info === false)) {
+            fclose($input);
+            if (!$success) {
                 @unlink($temporary);
             }
         }
