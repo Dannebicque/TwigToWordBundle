@@ -20,6 +20,8 @@ final class Configuration implements ConfigurationInterface
                         ->scalarNode('extends')->end()
                         ->variableNode('styles')->defaultValue([])->end()
                         ->variableNode('document')->defaultValue([])->end()
+                        ->variableNode('header')->defaultValue([])->end()
+                        ->variableNode('footer')->defaultValue([])->end()
                     ->end()
                 ->end()
             ->end()
