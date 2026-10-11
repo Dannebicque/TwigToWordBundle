@@ -4,6 +4,8 @@ namespace Davidannebicque\TwigToWordBundle\Html;
 
 use PhpOffice\PhpWord\PhpWord;
 use Davidannebicque\TwigToWordBundle\Html\Handler\TableHandler;
+use Davidannebicque\TwigToWordBundle\Html\Handler\ParagraphHandler;
+use Davidannebicque\TwigToWordBundle\Html\Handler\ListHandler;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\Element\TextRun;
 
@@ -55,64 +57,19 @@ final class HtmlDocumentInterpreter
                 $section->addPageBreak();
                 continue;
             }
-            if (in_array($tag, ['h1','h2','h3','h4','h5','h6','p'], true)) {
-                $style = $child->getAttribute('data-docx-style');
-                $run = $section->addTextRun($style !== '' ? $style : null);
-                $baseFont = ($style !== '' && isset($styles[$style]['font']) && is_array($styles[$style]['font'])) ? $this->normalizeFont($styles[$style]['font']) : [];
-                $this->renderInline($child, $run, $baseFont, $styles);
-            } elseif ($tag === 'table') {
-                (new TableHandler())->render($child, $section, $styles);
-            } elseif ($tag === 'ul' || $tag === 'ol') {
-                foreach ($child->childNodes as $li) {
-                    if ($li instanceof \DOMElement && strtolower($li->tagName) === 'li') {
-                        $section->addListItem(trim($li->textContent), 0, null, $tag === 'ol' ? 'decimal' : 'bullet');
-                    }
+            $handlers = [new ParagraphHandler(), new TableHandler(), new ListHandler()];
+            $handled = false;
+            foreach ($handlers as $handler) {
+                if ($handler->supports($child)) {
+                    $handler->render($child, $section, $styles);
+                    $handled = true;
+                    break;
                 }
-            } else {
+            }
+            if (!$handled) {
                 $this->renderChildren($child, $section, $styles);
             }
         }
     }
 
-    /** @param array<string, mixed> $font @return array<string, mixed> */
-    private function normalizeFont(array $font): array
-    {
-        $result = [];
-        foreach (['bold', 'italic', 'size', 'name', 'underline'] as $key) {
-            if (array_key_exists($key, $font)) { $result[$key] = $font[$key]; }
-        }
-        if (isset($font['color'])) { $result['color'] = ltrim((string) $font['color'], '#'); }
-        return $result;
-    }
-
-    /** @param array<string, mixed> $style @param array<string, mixed> $styles */
-    private function renderInline(\DOMNode $node, TextRun $run, array $style, array $styles): void
-    {
-        foreach ($node->childNodes as $child) {
-            if ($child instanceof \DOMText) {
-                if ($child->textContent !== '') { $run->addText($child->textContent, $style); }
-                continue;
-            }
-            if (!$child instanceof \DOMElement) { continue; }
-            $next = $style;
-            $tag = strtolower($child->tagName);
-            if (in_array($tag, ['strong','b'], true)) { $next['bold'] = true; }
-            if (in_array($tag, ['em','i'], true)) { $next['italic'] = true; }
-            if ($tag === 'u') { $next['underline'] = 'single'; }
-            if ($tag === 'br') { $run->addTextBreak(); continue; }
-            $named = $child->getAttribute('data-docx-style');
-            if ($named !== '' && isset($styles[$named]['font']) && is_array($styles[$named]['font'])) {
-                $font = $styles[$named]['font'];
-                $next = array_merge($next, array_filter([
-                    'bold' => $font['bold'] ?? null,
-                    'italic' => $font['italic'] ?? null,
-                    'size' => $font['size'] ?? null,
-                    'color' => isset($font['color']) ? ltrim((string) $font['color'], '#') : null,
-                ], static fn ($v) => $v !== null));
-            }
-            if ($child->hasAttribute('data-docx-font-color')) { $next['color'] = ltrim($child->getAttribute('data-docx-font-color'), '#'); }
-            if ($child->hasAttribute('data-docx-font-bold')) { $next['bold'] = $child->getAttribute('data-docx-font-bold') === 'true'; }
-            $this->renderInline($child, $run, $next, $styles);
-        }
-    }
 }
