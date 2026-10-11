@@ -118,3 +118,23 @@ Footer options `page_numbers: true` and `total_pages: true` produce `PAGE` and `
 ## Word feature coverage
 
 See [Word / PHPWord / TwigToWordBundle feature matrix](docs/word-feature-matrix.md) for supported mappings, limitations, examples, and the prioritized roadmap.
+
+### Multiple sections and cover pages
+
+Create a cover page and switch orientation for wide tables without converting the report to an image:
+
+```html
+<h1>Report cover</h1>
+<div data-docx-page-break></div>
+<div data-docx-toc data-docx-toc-min="1" data-docx-toc-max="3"></div>
+<h1>Introduction</h1>
+<div data-docx-section-break data-docx-orientation="landscape">
+  <h2>Wide results</h2>
+  <table><tr><th>Metric</th><th>Value</th></tr><tr><td>Users</td><td>100</td></tr></table>
+</div>
+<div data-docx-section-break data-docx-orientation="portrait">
+  <h2>Appendix</h2>
+</div>
+```
+
+Each `data-docx-section-break` creates a new Word section. Content after it continues in that section until another section break. Orientations are restricted to `portrait` and `landscape`. Configure `document.differentFirstPage: true` and `header.first_page: true` for a dedicated cover-page header. Word may require field updates to refresh the TOC and page counts.
