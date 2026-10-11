@@ -24,7 +24,7 @@ final class WordRenderer
         return $this->createFromHtml($this->twig->render($template, $context), $theme);
     }
 
-    public function createFromHtml(string $html, string $theme = 'default'): PhpWord
+    public function createFromHtml(string $html, ?string $theme = null): PhpWord
     {
         return $this->interpreter->fromHtml($html, $this->themes->resolve($theme ?? $this->defaultTheme));
     }
