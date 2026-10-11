@@ -20,6 +20,11 @@ final class HtmlDocumentInterpreter
         $document = new PhpWord();
         $styles = $theme['styles'] ?? [];
         $registrar->register($document, is_array($styles) ? $styles : []);
+        for ($level = 1; $level <= 6; ++$level) {
+            if (!isset($styles['Heading'.$level])) {
+                $document->addTitleStyle($level, ['bold' => true, 'size' => max(11, 20 - $level * 2)]);
+            }
+        }
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
         try {
