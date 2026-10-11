@@ -19,7 +19,7 @@ Legend: **Yes** = implemented in the bundle; **Partial** = limited mapping or pe
 | Merged cells | Yes | Yes | Partial | `colspan`, `rowspan`; complex layouts need tests |
 | Cell width | Yes | Yes | Partial | `data-docx-width` in twips |
 | Images / drawings | Yes | Yes | No | Not mapped |
-| Hyperlinks | Yes | Yes | No | `<a>` not mapped |
+| Hyperlinks | Yes | Yes | Yes | `<a href="https://…">`, HTTP(S) / mailto only |
 | Header / footer | Yes | Yes | Partial | Theme `header`, `footer` plain text |
 | First-page header/footer | Yes | Yes | Partial | `first_page`; document settings to verify |
 | Page number / total pages | Yes | Yes | Yes | `page_numbers`, `total_pages` |
@@ -77,7 +77,7 @@ twig_to_word:
 
 1. **High:** validate TOC, first-page header/footer, and merged cells by inspecting DOCX OOXML and opening in Word/LibreOffice.
 2. **High:** fix paragraph style font inheritance and isolate PHPWord's process-global named style registry.
-3. **Medium:** add safe local images, links, bookmarks and cross-references.
+3. **Medium:** add safe local images, bookmarks and cross-references.
 4. **Medium:** richer tables (repeated header rows, widths, borders), numbering definitions and section breaks.
 5. **Later:** footnotes, comments, document properties, page backgrounds and advanced Word layout.
 
@@ -86,3 +86,7 @@ twig_to_word:
 The bundle is a **selected HTML-to-DOCX mapping**, not a browser/CSS rendering engine. Unsupported HTML/CSS is not guaranteed to be preserved. The underlying PHPWord feature list is broader than the bundle's current handlers.
 
 References: https://phpoffice.github.io/PHPWord/usage/elements.html and https://phpoffice.github.io/PHPWord/usage/containers.html.
+
+## Hyperlinks
+
+External links in `<a href="https://example.org">Label</a>` are emitted as native clickable Word hyperlinks. Only `http:`, `https:` and `mailto:` are accepted; unsafe or unsupported URLs are emitted as plain text. Image support remains pending because a safe source policy (local paths, MIME type, size limits and remote fetch policy) must be defined.
