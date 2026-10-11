@@ -27,12 +27,16 @@ final class SafeImageResolver
             return null;
         }
 
+        if (str_starts_with($source, '/') || preg_match('~(^|/)\\.\\.?(/|$)~', $source)) {
+            return null;
+        }
+
         foreach ($this->allowedDirectories as $directory) {
             $base = realpath($directory);
             if ($base === false || !is_dir($base)) {
                 continue;
             }
-            $relative = ltrim($source, '/');
+            $relative = $source;
             $file = realpath($base.DIRECTORY_SEPARATOR.$relative);
             if ($file === false || !str_starts_with($file, $base.DIRECTORY_SEPARATOR) || !is_file($file) || !is_readable($file)) {
                 continue;
