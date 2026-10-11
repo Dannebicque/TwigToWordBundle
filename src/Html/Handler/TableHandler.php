@@ -34,7 +34,7 @@ final class TableHandler implements BlockHandlerInterface
                 }
             };
             foreach ($tr->childNodes as $cell) {
-                if (!$cell instanceof \\DOMElement || !in_array(strtolower($cell->tagName), ['td', 'th'], true)) {
+                if (!$cell instanceof \DOMElement || !in_array(strtolower($cell->tagName), ['td', 'th'], true)) {
                     continue;
                 }
                 while (isset($incoming[$column])) {
@@ -70,7 +70,7 @@ final class TableHandler implements BlockHandlerInterface
             }
             foreach ($incoming as $start => $span) {
                 if ($start < $column) {
-                    throw new \\InvalidArgumentException('Overlapping table row spans.');
+                    throw new \InvalidArgumentException('Overlapping table row spans.');
                 }
                 $emitContinuation($start, $span);
                 $column = $start + $span['width'];
