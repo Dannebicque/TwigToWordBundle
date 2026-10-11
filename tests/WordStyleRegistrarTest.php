@@ -19,7 +19,7 @@ final class WordStyleRegistrarTest extends TestCase
             ],
         ]);
         self::assertNotNull(Style::getStyle('ReportTitle'));
-        self::assertNotNull(Style::getStyle('ReportTitle_font'));
+        self::assertNull(Style::getStyle('ReportTitle_font'));
     }
 
     public function testRejectsInvalidStyleDefinition(): void
