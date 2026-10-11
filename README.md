@@ -138,3 +138,18 @@ Create a cover page and switch orientation for wide tables without converting th
 ```
 
 Each `data-docx-section-break` creates a new Word section. Content after it continues in that section until another section break. Orientations are restricted to `portrait` and `landscape`. Configure `document.differentFirstPage: true` and `header.first_page: true` for a dedicated cover-page header. Word may require field updates to refresh the TOC and page counts.
+
+### Section-specific margins, headers and footers
+
+```html
+<div data-docx-section-break
+     data-docx-orientation="landscape"
+     data-docx-margin-left="900"
+     data-docx-margin-right="900"
+     data-docx-header-text="Results"
+     data-docx-footer-text="Confidential">
+  <h2>Detailed results</h2>
+</div>
+```
+
+Margin attributes (`data-docx-margin-top`, `-bottom`, `-left`, `-right`) accept integer twips from 0 to 20000. Header/footer text overrides apply to the new section and remain editable. They replace the theme's configuration for that section; nested section breaks inherit the current override. For a different first-page header, use the theme's `document.differentFirstPage` and `header.first_page` settings.
