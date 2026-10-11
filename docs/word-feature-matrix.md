@@ -9,7 +9,7 @@ Legend: **Yes** = implemented in the bundle; **Partial** = limited mapping or pe
 | Paragraphs | Yes | Yes | Yes | `<p>` |
 | Headings / outline | Yes | Yes | Yes | `<h1>`…`<h6>` (native Title) |
 | Bold / italic / underline | Yes | Yes | Yes | `<strong>`, `<em>`, `<u>` |
-| Named paragraph styles | Yes | Yes | Partial | `data-docx-style`; font inheritance needs work |
+| Named paragraph styles | Yes | Yes | Partial | `data-docx-style`; configured font is applied as editable direct run formatting |
 | Inline font color / bold | Yes | Yes | Yes | `data-docx-font-color`, `data-docx-font-bold` |
 | Page breaks | Yes | Yes | Yes | `<div data-docx-page-break>` |
 | Bulleted / numbered lists | Yes | Yes | Yes | `<ul>`, `<ol>`, nested `<li>` |
@@ -76,7 +76,7 @@ twig_to_word:
 ## Architectural gaps and priorities
 
 1. **High:** validate TOC, first-page header/footer, and merged cells by inspecting DOCX OOXML and opening in Word/LibreOffice.
-2. **High:** fix paragraph style font inheritance and isolate PHPWord's process-global named style registry.
+2. **High:** improve native named-style font inheritance (currently direct run formatting) and isolate PHPWord's process-global named style registry.
 3. **Medium:** add safe local images, bookmarks and cross-references.
 4. **Medium:** richer tables (repeated header rows, widths, borders), numbering definitions and section breaks.
 5. **Later:** footnotes, comments, document properties, page backgrounds and advanced Word layout.
@@ -116,3 +116,12 @@ For security, absolute paths and `.` / `..` path segments are rejected, even if 
 ## Merged table OOXML test
 
 `tests/MergedTableDocxTest.php` checks that an exported DOCX contains `w:gridSpan` and `w:vMerge` for HTML `colspan` / `rowspan`. This verifies serialization, but complex mixed row/column merges and visual interoperability still require further test cases.
+
+## Regression coverage
+
+- `tests/ImageLifecycleTest.php`: snapshot isolation, private file permissions and idempotent cleanup.
+- `tests/DocxOutputTest.php`: verifies custom paragraph styles and direct run font formatting in `word/document.xml`.
+- `tests/DocxImageTest.php`: verifies embedded image media and document relationships.
+- `tests/MergedTableDocxTest.php`: verifies merged-cell OOXML.
+
+**Important:** A DOCX containing embedded image snapshots must be saved before calling `HtmlDocumentInterpreter::cleanup()`. The bundle's `WordRenderer::save()` handles this automatically. Applications calling PHPWord's writer directly are responsible for cleanup.
