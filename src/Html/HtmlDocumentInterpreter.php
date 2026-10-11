@@ -58,7 +58,7 @@ final class HtmlDocumentInterpreter
                 if ($min < 1 || $max > 9 || $min > $max) {
                     throw new \InvalidArgumentException('Invalid table of contents heading range.');
                 }
-                $section->addTOC(null, $min, $max);
+                $section->addTOC(null, null, $min, $max);
                 continue;
             }
             if ($tag === 'div' && $child->hasAttribute('data-docx-page-break')) {
