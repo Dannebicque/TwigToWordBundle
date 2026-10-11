@@ -31,6 +31,14 @@ final class InlineTextRenderer
             if (in_array($tag, ['em', 'i'], true)) { $next['italic'] = true; }
             if ($tag === 'u') { $next['underline'] = 'single'; }
             $named = $child->getAttribute('data-docx-style');
+            if ($named !== '' && ($styles[$named]['type'] ?? 'paragraph') === 'character'
+                && isset($styles[$named]['font']) && is_array($styles[$named]['font'])
+                && $child->childNodes->length === 1 && $child->firstChild instanceof \DOMText
+                && $font === [] && !$child->hasAttribute('data-docx-font-color')
+                && !$child->hasAttribute('data-docx-font-bold')) {
+                $run->addText($child->textContent, $named);
+                continue;
+            }
             if ($named !== '' && isset($styles[$named]['font']) && is_array($styles[$named]['font'])) {
                 $next = array_replace($next, $styles[$named]['font']);
             }
