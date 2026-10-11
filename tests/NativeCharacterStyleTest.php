@@ -49,6 +49,38 @@ final class NativeCharacterStyleTest extends TestCase
         }
     }
 
+    public function testNestedInlineFormattingRetainsStyleForUnmodifiedText(): void
+    {
+        $word = (new HtmlDocumentInterpreter())->fromHtml(
+            '<p><span data-docx-style="Important">Before <em>emphasis</em> after</span></p>',
+            ['styles' => ['Important' => ['type' => 'character', 'font' => ['color' => 'C00000']]]]
+        );
+        $path = tempnam(sys_get_temp_dir(), 'word_nested_');
+        self::assertNotFalse($path);
+        try {
+            IOFactory::createWriter($word, 'Word2007')->save($path);
+            (new CharacterStyleDocxFixer())->fix($path);
+            $zip = new \ZipArchive();
+            self::assertTrue($zip->open($path) === true);
+            try {
+                $xml = $zip->getFromName('word/document.xml');
+                self::assertIsString($xml);
+                $dom = new \DOMDocument();
+                self::assertTrue($dom->loadXML($xml, LIBXML_NONET));
+                $xp = new \DOMXPath($dom);
+                $xp->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
+                self::assertSame(1, $xp->query('//w:r[w:t="Before "]/w:rPr/w:rStyle[@w:val="Important"]')->length);
+                self::assertSame(1, $xp->query('//w:r[w:t=" after"]/w:rPr/w:rStyle[@w:val="Important"]')->length);
+                self::assertSame(1, $xp->query('//w:r[w:t="emphasis"]/w:rPr/w:i')->length);
+                self::assertSame(1, $xp->query('//w:r[w:t="emphasis"]/w:rPr/w:color[@w:val="C00000"]')->length);
+            } finally {
+                $zip->close();
+            }
+        } finally {
+            unlink($path);
+        }
+    }
+
     public function testCharacterStyleCannotContainParagraphOptions(): void
     {
         $this->expectException(\InvalidArgumentException::class);
