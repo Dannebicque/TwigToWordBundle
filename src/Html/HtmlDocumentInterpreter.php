@@ -14,9 +14,11 @@ final class HtmlDocumentInterpreter
     /** @param array<string, mixed> $theme */
     public function fromHtml(string $html, array $theme = []): PhpWord
     {
+        $registrar = new WordStyleRegistrar();
+        $registrar->reset();
         $document = new PhpWord();
         $styles = $theme['styles'] ?? [];
-        (new WordStyleRegistrar())->register($document, is_array($styles) ? $styles : []);
+        $registrar->register($document, is_array($styles) ? $styles : []);
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
         try {
