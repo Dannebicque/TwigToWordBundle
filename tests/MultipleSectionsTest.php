@@ -15,7 +15,8 @@ final class MultipleSectionsTest extends TestCase
             '<h1>Introduction</h1>'.
             '<div data-docx-section-break data-docx-orientation="landscape" data-docx-margin-left="900" data-docx-margin-right="900" data-docx-header-text="Landscape results" data-docx-footer-text="Confidential"><h2>Wide table</h2></div>'.
             '<p>Continuation in landscape</p>'.
-            '<div data-docx-section-break data-docx-orientation="portrait"><p>Annex</p></div>'
+            '<div data-docx-section-break data-docx-orientation="portrait"><p>Annex</p></div>',
+            ['footer' => ['text' => 'Page', 'page_numbers' => true, 'total_pages' => true, 'alignment' => 'center']]
         );
         self::assertCount(3, $word->getSections());
         self::assertSame(900, $word->getSections()[1]->getStyle()->getMarginLeft());
@@ -43,6 +44,8 @@ final class MultipleSectionsTest extends TestCase
                 }
                 self::assertStringContainsString('Landscape results', implode('', $headers));
                 self::assertStringContainsString('Confidential', implode('', $footers));
+                self::assertStringContainsString('NUMPAGES', implode('', $footers));
+                self::assertStringContainsString('PAGE', implode('', $footers));
             } finally {
                 $zip->close();
             }
