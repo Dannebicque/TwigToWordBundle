@@ -13,7 +13,18 @@ use PhpOffice\PhpWord\Element\Section;
 
 final class HtmlDocumentInterpreter
 {
+    /** @var array<int, list<string>> */
+    private array $temporaryImages = [];
+    private ?int $currentDocumentId = null;
+
     public function __construct(private readonly ?SafeImageResolver $images = null) {}
+
+    public function cleanup(PhpWord $document): void
+    {
+        $id = spl_object_id($document);
+        foreach ($this->temporaryImages[$id] ?? [] as $file) { @unlink($file); }
+        unset($this->temporaryImages[$id]);
+    }
 
     /** @param array<string, mixed> $theme */
     public function fromHtml(string $html, array $theme = []): PhpWord
@@ -21,6 +32,7 @@ final class HtmlDocumentInterpreter
         $registrar = new WordStyleRegistrar();
         $registrar->reset();
         $document = new PhpWord();
+        $this->currentDocumentId = spl_object_id($document);
         $styles = $theme['styles'] ?? [];
         $registrar->register($document, is_array($styles) ? $styles : []);
         for ($level = 1; $level <= 6; ++$level) {
@@ -68,7 +80,11 @@ final class HtmlDocumentInterpreter
                 $section->addPageBreak();
                 continue;
             }
-            $handlers = [new ParagraphHandler(), new TableHandler(), new ListHandler(), new ImageHandler($this->images ?? new SafeImageResolver())];
+            $handlers = [new ParagraphHandler(), new TableHandler(), new ListHandler(), new ImageHandler($this->images ?? new SafeImageResolver(), function (string $file): void {
+                if ($this->currentDocumentId !== null) {
+                    $this->temporaryImages[$this->currentDocumentId][] = $file;
+                }
+            })];
             $handled = false;
             foreach ($handlers as $handler) {
                 if ($handler->supports($child)) {
