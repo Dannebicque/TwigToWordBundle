@@ -100,3 +100,17 @@ twig_to_word:
 ```
 
 The page number is a native Word `PAGE` field, not a fixed number. Header/footer text is plain text (not interpreted as HTML); alignment can be `left`, `center`, or `right`.
+
+## Editable table of contents
+
+Insert a native Word table of contents in a Twig template:
+
+```html
+<div data-docx-toc data-docx-toc-min="1" data-docx-toc-max="3"></div>
+<h1>Introduction</h1>
+<h2>Background</h2>
+```
+
+The DOCX contains a Word TOC field, not a static HTML listing. In Word, update the field/table of contents to refresh headings and page numbers after editing.
+
+Footer options `page_numbers: true` and `total_pages: true` produce `PAGE` and `NUMPAGES` fields. Use `first_page: true` on a header or footer configuration to target the first-page variant (requires the document's first-page header/footer setting in Word). Table cells accept HTML `colspan` and `rowspan`.
