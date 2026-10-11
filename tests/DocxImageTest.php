@@ -18,10 +18,15 @@ final class DocxImageTest extends TestCase
         $docx = $directory.'/result.docx';
         file_put_contents($image, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg=='));
         try {
-            $word = (new HtmlDocumentInterpreter(new SafeImageResolver([$directory])))->fromHtml(
+            $interpreter = new HtmlDocumentInterpreter(new SafeImageResolver([$directory]));
+            $word = $interpreter->fromHtml(
                 '<img src="logo.png" data-docx-width="120">'
             );
-            IOFactory::createWriter($word, 'Word2007')->save($docx);
+            try {
+                IOFactory::createWriter($word, 'Word2007')->save($docx);
+            } finally {
+                $interpreter->cleanup($word);
+            }
             $zip = new \ZipArchive();
             self::assertTrue($zip->open($docx) === true);
             try {
