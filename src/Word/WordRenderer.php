@@ -31,7 +31,11 @@ final class WordRenderer
 
     public function save(PhpWord $document, string $path): void
     {
-        IOFactory::createWriter($document, 'Word2007')->save($path);
+        try {
+            IOFactory::createWriter($document, 'Word2007')->save($path);
+        } finally {
+            $this->interpreter->cleanup($document);
+        }
     }
 
     /** @param array<string, mixed> $context */
