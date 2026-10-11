@@ -37,10 +37,16 @@ final class WordStyleRegistrar
             // PHPWord's paragraph style supports a nested font definition.
             // This produces a single editable Word paragraph style rather than
             // a paragraph style plus unrelated character style.
-            if ($font !== []) {
-                $paragraph['font'] = $this->fontOptions($font);
+            // PHPWord's addTitleStyle() accepts both font and paragraph
+            // properties and writes a heading style with a proper w:rPr.
+            if (preg_match('/^Heading([1-6])$/', $name, $matches)) {
+                $document->addTitleStyle((int) $matches[1], $this->fontOptions($font), $paragraph);
+            } else {
+                $document->addParagraphStyle($name, $paragraph);
+                if ($font !== []) {
+                    $document->addFontStyle($name.'_font', $this->fontOptions($font));
+                }
             }
-            $document->addParagraphStyle($name, $paragraph);
         }
     }
 
