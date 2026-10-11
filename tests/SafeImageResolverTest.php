@@ -15,6 +15,8 @@ final class SafeImageResolverTest extends TestCase
         self::assertNull($resolver->resolve('https://example.org/logo.png'));
         self::assertNull($resolver->resolve('data:image/png;base64,AAAA'));
         self::assertNull($resolver->resolve('../etc/passwd'));
+        self::assertNull($resolver->resolve('/etc/passwd'));
+        self::assertNull($resolver->resolve('nested/../logo.png'));
         self::assertNull($resolver->resolve('php://filter/resource=secret'));
     }
 
