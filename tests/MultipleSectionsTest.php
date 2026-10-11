@@ -13,11 +13,13 @@ final class MultipleSectionsTest extends TestCase
     {
         $word = (new HtmlDocumentInterpreter())->fromHtml(
             '<h1>Introduction</h1>'.
-            '<div data-docx-section-break data-docx-orientation="landscape"><h2>Wide table</h2></div>'.
+            '<div data-docx-section-break data-docx-orientation="landscape" data-docx-margin-left="900" data-docx-margin-right="900"><h2>Wide table</h2></div>'.
             '<p>Continuation in landscape</p>'.
             '<div data-docx-section-break data-docx-orientation="portrait"><p>Annex</p></div>'
         );
         self::assertCount(3, $word->getSections());
+        self::assertSame(900, $word->getSections()[1]->getStyle()->getMarginLeft());
+        self::assertSame(900, $word->getSections()[1]->getStyle()->getMarginRight());
         $file = tempnam(sys_get_temp_dir(), 'word_sections_');
         self::assertNotFalse($file);
         try {
@@ -37,6 +39,12 @@ final class MultipleSectionsTest extends TestCase
         } finally {
             unlink($file);
         }
+    }
+
+    public function testRejectsInvalidSectionMargin(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        (new HtmlDocumentInterpreter())->fromHtml('<div data-docx-section-break data-docx-margin-left="-20">Invalid</div>');
     }
 
     public function testRejectsUnknownOrientation(): void
