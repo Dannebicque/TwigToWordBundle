@@ -153,3 +153,24 @@ Each `data-docx-section-break` creates a new Word section. Content after it cont
 ```
 
 Margin attributes (`data-docx-margin-top`, `-bottom`, `-left`, `-right`) accept integer twips from 0 to 20000. Header/footer text overrides apply to the new section and remain editable. They override only the text while preserving other theme settings (such as alignment, page numbering and total-page fields). An explicitly empty attribute clears the text. Nested section breaks inherit the current override. For a different first-page header, use the theme's `document.differentFirstPage` and `header.first_page` settings.
+
+### Native editable Word styles
+
+Custom theme styles containing `font` and `paragraph` properties are now exported as **one native Word paragraph style** rather than as separate, unrelated styles or direct formatting on every text run:
+
+```yaml
+twig_to_word:
+  themes:
+    default:
+      styles:
+        ReportTitle:
+          paragraph:
+            alignment: center
+          font:
+            name: Aptos Display
+            size: 22
+            bold: true
+            color: '17365D'
+```
+
+Use `<h1 data-docx-style="ReportTitle">Report</h1>` or `<p data-docx-style="ReportTitle">Report</p>`. In Word, modify the **ReportTitle** style to update every paragraph using it. Explicit inline `<strong>`, `<em>` or `data-docx-font-*` formatting still overrides the style locally. Native `Heading1` through `Heading6` remain compatible with the table of contents.
