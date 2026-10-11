@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Davidannebicque\TwigToWordBundle\Html\Handler;
 
 use PhpOffice\PhpWord\Element\Section;
+use PhpOffice\PhpWord\Element\Cell;
 
 final class TableHandler implements BlockHandlerInterface
 {
@@ -12,7 +13,7 @@ final class TableHandler implements BlockHandlerInterface
         return strtolower($element->tagName) === 'table';
     }
 
-    public function render(\DOMElement $element, Section $section, array $styles): void
+    public function render(\DOMElement $element, Section|Cell $section, array $styles): void
     {
         $styleName = $element->getAttribute('data-docx-style');
         if ($styleName !== '' && ($styles[$styleName]['type'] ?? null) !== 'table') {
@@ -69,8 +70,7 @@ final class TableHandler implements BlockHandlerInterface
                 }
                 $wordCell = $table->addCell($cellWidth, $cellStyle);
                 $column += $colspan;
-                $run = $wordCell->addTextRun();
-                (new InlineTextRenderer())->render($cell, $run, $isHeader ? ['bold' => true] : [], $styles);
+                $this->renderCellContents($cell, $wordCell, $isHeader, $styles);
             }
             ksort($incoming);
             foreach ($incoming as $start => $span) {
@@ -81,6 +81,29 @@ final class TableHandler implements BlockHandlerInterface
                 $column = $start + $span['width'];
             }
         }
+    }
+
+    /** @param array<string, mixed> $styles */
+    private function renderCellContents(\DOMElement $htmlCell, Cell $wordCell, bool $header, array $styles): void
+    {
+        $buffer = new \DOMDocument();
+        $wrapper = $buffer->createElement('div');
+        $buffer->appendChild($wrapper);
+        $flush = function () use ($wrapper, $wordCell, $header, $styles): void {
+            if (!$wrapper->hasChildNodes()) { return; }
+            $run = $wordCell->addTextRun();
+            (new InlineTextRenderer())->render($wrapper, $run, $header ? ['bold' => true] : [], $styles);
+            while ($wrapper->firstChild !== null) { $wrapper->removeChild($wrapper->firstChild); }
+        };
+        foreach ($htmlCell->childNodes as $child) {
+            if ($child instanceof \DOMElement && strtolower($child->tagName) === 'table') {
+                $flush();
+                $this->render($child, $wordCell, $styles);
+            } else {
+                $wrapper->appendChild($buffer->importNode($child, true));
+            }
+        }
+        $flush();
     }
 
     /** @return list<\DOMElement> */
