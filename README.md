@@ -2,15 +2,31 @@
 
 A Symfony bundle for generating editable Word (DOCX) documents from Twig templates.
 
-> **Experimental prototype:** the HTML interpreter currently handles simple paragraphs, headings, inline bold/italic/underline, tables, lists, and page breaks. Not production-ready.
+> **Release candidate:** ready for integration testing, not yet production-certified. Supported features include editable paragraph/character/table styles, headings, tables (including merged and nested cells), lists, images from allowlisted directories, hyperlinks, sections, headers/footers and Word TOC fields.
 
 ## Requirements
 
 PHP 8.2+, Symfony 6.4/7/8, PHPWord 1.3+.
 
-## Installation (development)
+## Install the first release candidate
 
-Until a tagged release is published, use a Composer VCS repository pointing to this GitHub repository and require the development branch.
+Until a signed/tagged release is published, install the immutable RC branch snapshot using a Composer VCS repository. Add to the consuming Symfony project's `composer.json`:
+
+```json
+{
+  "repositories": [
+    { "type": "vcs", "url": "https://github.com/Dannebicque/TwigToWordBundle" }
+  ]
+}
+```
+
+Then run:
+
+```bash
+composer require 'davidannebicque/twig-to-word-bundle:dev-rc/0.1.0'
+```
+
+This installs the `rc/0.1.0` branch, **not** a SemVer `0.1.0-RC1` tag. It is suitable for testing but the branch reference is mutable; pin the resulting commit in `composer.lock` and do not use this version as a stable production dependency.
 
 ## Usage
 
@@ -76,7 +92,7 @@ vendor/bin/phpunit tests
 
 ## License
 
-MIT (license file to be added before release).
+MIT (see [LICENSE](LICENSE)).
 
 ## Important: style registry lifecycle
 
