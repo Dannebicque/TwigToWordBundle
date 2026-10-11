@@ -4,6 +4,7 @@ namespace Davidannebicque\TwigToWordBundle\Html;
 
 use PhpOffice\PhpWord\PhpWord;
 use Davidannebicque\TwigToWordBundle\Word\WordStyleRegistrar;
+use Davidannebicque\TwigToWordBundle\Word\HeaderFooterRenderer;
 use Davidannebicque\TwigToWordBundle\Html\Handler\TableHandler;
 use Davidannebicque\TwigToWordBundle\Html\Handler\ParagraphHandler;
 use Davidannebicque\TwigToWordBundle\Html\Handler\ListHandler;
@@ -29,6 +30,7 @@ final class HtmlDocumentInterpreter
         }
         $sectionOptions = $theme['document'] ?? [];
         $section = $document->addSection(is_array($sectionOptions) ? array_intersect_key($sectionOptions, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight'])) : []);
+        (new HeaderFooterRenderer())->apply($section, $theme);
         // HTML parsing does not declare the id attribute as an XML ID.
         // Locate our wrapper deterministically instead of relying on getElementById().
         $root = (new \DOMXPath($dom))->query('//*[@id="twig-to-word-root"]')->item(0);
