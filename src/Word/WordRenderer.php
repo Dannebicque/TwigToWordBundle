@@ -15,17 +15,18 @@ final class WordRenderer
         private readonly Environment $twig,
         private readonly HtmlDocumentInterpreter $interpreter,
         private readonly ThemeRegistry $themes,
+        private readonly string $defaultTheme = 'default',
     ) {}
 
     /** @param array<string, mixed> $context */
-    public function createFromTemplate(string $template, array $context = [], string $theme = 'default'): PhpWord
+    public function createFromTemplate(string $template, array $context = [], ?string $theme = null): PhpWord
     {
         return $this->createFromHtml($this->twig->render($template, $context), $theme);
     }
 
     public function createFromHtml(string $html, string $theme = 'default'): PhpWord
     {
-        return $this->interpreter->fromHtml($html, $this->themes->resolve($theme));
+        return $this->interpreter->fromHtml($html, $this->themes->resolve($theme ?? $this->defaultTheme));
     }
 
     public function save(PhpWord $document, string $path): void
