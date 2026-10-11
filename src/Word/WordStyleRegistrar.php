@@ -34,11 +34,10 @@ final class WordStyleRegistrar
             if (!is_array($paragraph) || !is_array($font)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
             }
-            // PHPWord's paragraph style supports a nested font definition.
-            // This produces a single editable Word paragraph style rather than
-            // a paragraph style plus unrelated character style.
-            // PHPWord's addTitleStyle() accepts both font and paragraph
-            // properties and writes a heading style with a proper w:rPr.
+            // Native headings are registered as title styles so that Word's
+            // table of contents can reference them. Custom paragraph styles
+            // keep their paragraph properties; font properties are applied
+            // to editable runs by ParagraphHandler.
             if (preg_match('/^Heading([1-6])$/', $name, $matches)) {
                 $document->addTitleStyle((int) $matches[1], $this->fontOptions($font), $paragraph);
             } else {
