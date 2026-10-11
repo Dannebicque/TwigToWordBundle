@@ -16,6 +16,15 @@ final class InlineTextRenderer
             if (!$child instanceof \DOMElement) { continue; }
             $tag = strtolower($child->tagName);
             if ($tag === 'br') { $run->addTextBreak(); continue; }
+            if ($tag === 'a') {
+                $href = trim($child->getAttribute('href'));
+                if ($this->isSafeLink($href)) {
+                    $run->addLink($href, trim($child->textContent), ['color' => '0563C1', 'underline' => 'single']);
+                } else {
+                    $this->render($child, $run, $font, $styles);
+                }
+                continue;
+            }
             if (in_array($tag, ['script', 'style'], true)) { continue; }
             $next = $font;
             if (in_array($tag, ['strong', 'b'], true)) { $next['bold'] = true; }
@@ -34,6 +43,13 @@ final class InlineTextRenderer
             $this->render($child, $run, $next, $styles);
         }
     }
+    private function isSafeLink(string $href): bool
+    {
+        if (preg_match('/[\\x00-\\x1F\\x7F]/', $href)) { return false; }
+        $scheme = strtolower((string) parse_url($href, PHP_URL_SCHEME));
+        return in_array($scheme, ['https', 'http', 'mailto'], true);
+    }
+
     private function normalize(array $font): array
     {
         $result = array_intersect_key($font, array_flip(['name', 'size', 'color', 'bold', 'italic', 'underline']));
