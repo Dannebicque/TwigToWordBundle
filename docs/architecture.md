@@ -33,4 +33,4 @@ The long-term solution is a document-scoped style naming strategy or an isolated
 
 ## Current style limitation
 
-PHPWord registers custom paragraph and character styles separately. The registrar creates the named paragraph style and an auxiliary `<name>_font` character style. To ensure reliable formatting, the paragraph handler currently applies the theme font as direct editable run properties. This is not native Word style inheritance. `tests/DocxOutputTest.php` verifies the paragraph style reference and the bold/color run properties in exported OOXML.
+PHPWord can register a font style with paragraph properties under a single name (`addFontStyle($name, $font, $paragraph)`). Its Word2007 writer serializes this combination as a native `w:style` of type `paragraph`, with both `w:pPr` and `w:rPr`. The paragraph handler now references that style without duplicating its font properties on each text run. As a result, changing the paragraph style in Word updates all unoverridden occurrences. Explicit inline markup still produces direct run formatting. `tests/DocxOutputTest.php` checks both the style definition and the absence of redundant run-level bold/color.
