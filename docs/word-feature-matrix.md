@@ -18,7 +18,7 @@ Legend: **Yes** = implemented in the bundle; **Partial** = limited mapping or pe
 | Header cells / inline formatting | Yes | Yes | Yes | `<th>`, inline HTML |
 | Merged cells | Yes | Yes | Partial | `colspan`, `rowspan`; complex layouts need tests |
 | Cell width | Yes | Yes | Partial | `data-docx-width` in twips |
-| Images / drawings | Yes | Yes | No | Not mapped |
+| Images / drawings | Yes | Yes | Partial | Local PNG/JPEG/GIF only, configured allowlist; no SVG/remote URLs |
 | Hyperlinks | Yes | Yes | Yes | `<a href="https://…">`, HTTP(S) / mailto only |
 | Header / footer | Yes | Yes | Partial | Theme `header`, `footer` plain text |
 | First-page header/footer | Yes | Yes | Partial | `first_page`; document settings to verify |
@@ -89,4 +89,20 @@ References: https://phpoffice.github.io/PHPWord/usage/elements.html and https://
 
 ## Hyperlinks
 
-External links in `<a href="https://example.org">Label</a>` are emitted as native clickable Word hyperlinks. Only `http:`, `https:` and `mailto:` are accepted; unsafe or unsupported URLs are emitted as plain text. Image support remains pending because a safe source policy (local paths, MIME type, size limits and remote fetch policy) must be defined.
+External links in `<a href="https://example.org">Label</a>` are emitted as native clickable Word hyperlinks. Only `http:`, `https:` and `mailto:` are accepted; unsafe or unsupported URLs are emitted as plain text. Images use a strict local-directory allowlist. Remote URLs, data URIs and SVG are rejected.
+
+## Secure images
+
+```yaml
+twig_to_word:
+  images:
+    allowed_directories:
+      - '%kernel.project_dir%/public/word-assets'
+    max_bytes: 5242880
+```
+
+```html
+<img src="logo.png" data-docx-width="160" alt="Institution logo">
+```
+
+Image resolution is relative to the configured directories. The default allowlist is empty: **images are disabled unless explicitly configured**. The resolver verifies the canonical path using `realpath` (including symlink escapes), rejects URL schemes and data URIs, checks file size, MIME type and image dimensions, and accepts only PNG, JPEG and GIF. No network access is performed. Unsupported images are skipped. For untrusted concurrently writable asset directories, avoid accepting user-controlled symlinks or file replacements between validation and DOCX writing.
