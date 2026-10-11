@@ -35,14 +35,16 @@ final class WordStyleRegistrar
             if (!is_array($paragraph) || !is_array($font)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
             }
-            foreach (['basedOn', 'next'] as $relation) {
-                if (isset($definition[$relation])) {
-                    $paragraph[$relation] = $definition[$relation];
-                }
-            }
             $type = $definition['type'] ?? 'paragraph';
             if (!in_array($type, ['paragraph', 'character', 'table'], true)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style type for "%s".', $name));
+            }
+            if ($type === 'paragraph') {
+                foreach (['basedOn', 'next'] as $relation) {
+                    if (isset($definition[$relation])) {
+                        $paragraph[$relation] = $definition[$relation];
+                    }
+                }
             }
             if ($type === 'table') {
                 $table = $definition['table'] ?? [];
