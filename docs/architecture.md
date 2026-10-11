@@ -20,3 +20,9 @@ The parser uses `LIBXML_NONET`. Remote resources are not fetched by the current 
 - Separate element handlers and document AST
 - Add safe image handling, headers/footers, sections, table merging
 - Integration tests inspecting the generated DOCX XML
+
+## PHPWord style lifecycle
+
+PHPWord uses a static registry for named styles. The interpreter currently resets that registry before creating a new document. This avoids leaking named styles between *sequentially generated* documents, but it does **not** support holding multiple unsaved PhpWord instances with different themes in memory at the same time. Generate and save one document before starting another. Concurrent document generation in the same PHP process also requires additional isolation.
+
+The long-term solution is a document-scoped style naming strategy or an isolated writer lifecycle, backed by DOCX XML integration tests. Do not claim simultaneous-document isolation until those tests exist.
