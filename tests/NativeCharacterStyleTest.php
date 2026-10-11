@@ -5,6 +5,7 @@ namespace Davidannebicque\TwigToWordBundle\Tests;
 
 use Davidannebicque\TwigToWordBundle\Html\HtmlDocumentInterpreter;
 use PhpOffice\PhpWord\IOFactory;
+use Davidannebicque\TwigToWordBundle\Word\CharacterStyleDocxFixer;
 use PHPUnit\Framework\TestCase;
 
 final class NativeCharacterStyleTest extends TestCase
@@ -19,6 +20,7 @@ final class NativeCharacterStyleTest extends TestCase
         self::assertNotFalse($path);
         try {
             IOFactory::createWriter($word, 'Word2007')->save($path);
+            (new CharacterStyleDocxFixer())->fix($path);
             $zip = new \ZipArchive();
             self::assertTrue($zip->open($path) === true);
             try {
