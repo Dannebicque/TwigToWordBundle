@@ -25,6 +25,7 @@ final class WordStyleRegistrar
     /** @param array<string, mixed> $styles */
     public function register(PhpWord $document, array $styles): void
     {
+        $this->validateRelations($styles);
         foreach ($styles as $name => $definition) {
             if (!is_string($name) || !is_array($definition)) {
                 continue;
@@ -33,6 +34,11 @@ final class WordStyleRegistrar
             $font = $definition['font'] ?? [];
             if (!is_array($paragraph) || !is_array($font)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
+            }
+            foreach (['basedOn', 'next'] as $relation) {
+                if (isset($definition[$relation])) {
+                    $paragraph[$relation] = $definition[$relation];
+                }
             }
             $type = $definition['type'] ?? 'paragraph';
             if (!in_array($type, ['paragraph', 'character', 'table'], true)) {
@@ -66,6 +72,38 @@ final class WordStyleRegistrar
                 } else {
                     $document->addParagraphStyle($name, $paragraph);
                 }
+            }
+        }
+    }
+
+    /** @param array<string, mixed> $styles */
+    private function validateRelations(array $styles): void
+    {
+        foreach ($styles as $name => $definition) {
+            if (!is_string($name) || !is_array($definition)) { continue; }
+            $type = $definition['type'] ?? 'paragraph';
+            foreach (['basedOn', 'next'] as $relation) {
+                $target = $definition[$relation] ?? ($definition['paragraph'][$relation] ?? null);
+                if ($target === null) { continue; }
+                if ($type !== 'paragraph' || !is_string($target) || $target === '') {
+                    throw new \InvalidArgumentException(sprintf('Invalid %s relation for Word style "%s".', $relation, $name));
+                }
+                if ($target !== 'Normal' && !preg_match('/^Heading[1-6]$/', $target)
+                    && (!isset($styles[$target]) || ($styles[$target]['type'] ?? 'paragraph') !== 'paragraph')) {
+                    throw new \InvalidArgumentException(sprintf('Unknown paragraph style "%s" referenced by "%s".', $target, $name));
+                }
+            }
+            $seen = [$name => true];
+            $current = $name;
+            while (true) {
+                $style = $styles[$current] ?? [];
+                $parent = $style['basedOn'] ?? ($style['paragraph']['basedOn'] ?? null);
+                if ($parent === null || $parent === 'Normal' || !isset($styles[$parent])) { break; }
+                if (isset($seen[$parent])) {
+                    throw new \InvalidArgumentException(sprintf('Circular Word style inheritance involving "%s".', $name));
+                }
+                $seen[$parent] = true;
+                $current = $parent;
             }
         }
     }
