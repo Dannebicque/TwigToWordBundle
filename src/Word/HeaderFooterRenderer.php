@@ -21,14 +21,21 @@ final class HeaderFooterRenderer
 
             $text = $config['text'] ?? '';
             $pageNumbers = $config['page_numbers'] ?? false;
-            if (!is_string($text) || !is_bool($pageNumbers)) {
+            $totalPages = $config['total_pages'] ?? false;
+            if (!is_string($text) || !is_bool($pageNumbers) || !is_bool($totalPages)) {
                 throw new \InvalidArgumentException(sprintf('Invalid %s configuration.', $part));
             }
-            if ($text === '' && !$pageNumbers) {
+            if ($text === '' && !$pageNumbers && !$totalPages) {
                 continue;
             }
 
-            $container = $part === 'header' ? $section->addHeader() : $section->addFooter();
+            $firstPage = $config['first_page'] ?? false;
+            if (!is_bool($firstPage)) {
+                throw new \InvalidArgumentException(sprintf('Invalid %s first_page flag.', $part));
+            }
+            $container = $part === 'header'
+                ? $section->addHeader($firstPage ? \PhpOffice\PhpWord\Element\Header::FIRST : \PhpOffice\PhpWord\Element\Header::AUTO)
+                : $section->addFooter($firstPage ? \PhpOffice\PhpWord\Element\Footer::FIRST : \PhpOffice\PhpWord\Element\Footer::AUTO);
             $alignment = $config['alignment'] ?? 'left';
             if (!in_array($alignment, ['left', 'center', 'right'], true)) {
                 throw new \InvalidArgumentException(sprintf('Invalid %s alignment.', $part));
@@ -43,6 +50,12 @@ final class HeaderFooterRenderer
                     $run->addText(' ');
                 }
                 $run->addField('PAGE');
+            }
+            if ($totalPages) {
+                if ($text !== '' || $pageNumbers) {
+                    $run->addText($pageNumbers ? ' / ' : ' ');
+                }
+                $run->addField('NUMPAGES');
             }
         }
     }
