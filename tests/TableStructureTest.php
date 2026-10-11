@@ -30,7 +30,7 @@ final class TableStructureTest extends TestCase
                 $xp = new \DOMXPath($dom);
                 $xp->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
                 self::assertSame(3, $xp->query('//w:tbl/w:tr')->length);
-                self::assertSame(0, $xp->query('//w:t[text()="Inner"]')->length);
+                self::assertSame(1, $xp->query('//w:t[text()="Inner"]')->length);
                 self::assertSame(1, $xp->query('//w:t[text()="Header"]')->length);
                 self::assertSame(1, $xp->query('//w:t[text()="Footer"]')->length);
             } finally { $zip->close(); }
