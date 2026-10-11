@@ -150,3 +150,7 @@ The exported `word/document.xml` should include `w:titlePg` and a header referen
 ## Error handling
 
 The interpreter now cleans its tracked temporary image snapshots if HTML conversion throws an exception, including invalid TOC ranges. `tests/RenderingFailureCleanupTest.php` checks this failure path. A successful direct PHPWord export still requires explicit `cleanup()` if `WordRenderer::save()` is not used.
+
+## Multiple Word sections
+
+`data-docx-section-break` starts a new editable Word section. The optional `data-docx-orientation="landscape"` or `"portrait"` overrides the previous orientation; content following the marker stays in that section until the next marker. Section-level headers/footers are reapplied from the theme. `tests/MultipleSectionsTest.php` checks the generated DOCX and rejects invalid orientation values. Section-specific margins, header/footer variants, and continuous section breaks remain future enhancements.
