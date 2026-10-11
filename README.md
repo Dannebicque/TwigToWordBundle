@@ -242,8 +242,8 @@ twig_to_word:
             spaceAfter: 120
 ```
 
-The bundle validates parent/next references and rejects inheritance cycles. The `next` relation is currently emitted for paragraph-only styles; PHPWord's font+paragraph combined-style writer does not serialize `next` yet.
+The bundle validates parent/next references and rejects inheritance cycles. The `next` relation is also emitted for combined font+paragraph styles by the DOCX compatibility pass in `WordRenderer::save()`. When writing directly with PHPWord's `IOFactory`, this compatibility pass is not applied.
 
 ### Complex HTML tables
 
-The table renderer processes direct `tr` children and rows inside `thead`, `tbody`, and `tfoot`. Rows belonging to nested tables no longer leak into the parent table's row count. Nested table *text* is currently flattened into its containing cell; fully nested editable Word tables remain a separate feature.
+The table renderer processes direct `tr` children and rows inside `thead`, `tbody`, and `tfoot`. Rows belonging to nested tables no longer leak into the parent table's row count. Directly nested HTML `<table>` elements inside a `<td>` or `<th>` are now exported as real editable Word tables inside the parent cell. Text before and after a nested table remains in the containing cell.
