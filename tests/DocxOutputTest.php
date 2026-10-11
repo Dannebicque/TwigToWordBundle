@@ -43,15 +43,14 @@ final class DocxOutputTest extends TestCase
                 $xpath = new \DOMXPath($stylesXml);
                 $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
                 self::assertGreaterThan(0, $xpath->query('//w:style[@w:styleId="ReportTitle"]')->length);
-                // A custom paragraph style is registered by name.
-                // PHPWord's custom paragraph styles and character styles are
-                // separate; typography inheritance needs further OOXML work.
-                self::assertGreaterThan(0, $xpath->query('//w:style[@w:styleId="ReportTitle"]')->length);
+                // The custom paragraph style and its font formatting both survive export.
 
                 $xpath = new \DOMXPath($documentXml);
                 $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
                 self::assertGreaterThan(0, $xpath->query('//w:pStyle[@w:val="ReportTitle"]')->length);
                 self::assertGreaterThan(0, $xpath->query('//w:t[text()="Rapport"]')->length);
+                self::assertGreaterThan(0, $xpath->query('//w:r[w:t="Rapport"]/w:rPr/w:b')->length);
+                self::assertGreaterThan(0, $xpath->query('//w:r[w:t="Rapport"]/w:rPr/w:color[@w:val="17365D"]')->length);
             } finally {
                 $zip->close();
             }
