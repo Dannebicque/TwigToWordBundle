@@ -174,3 +174,29 @@ twig_to_word:
 ```
 
 Use `<h1 data-docx-style="ReportTitle">Report</h1>` or `<p data-docx-style="ReportTitle">Report</p>`. In Word, modify the **ReportTitle** style to update every paragraph using it. Explicit inline `<strong>`, `<em>` or `data-docx-font-*` formatting still overrides the style locally. Native `Heading1` through `Heading6` remain compatible with the table of contents.
+
+### Reusable Word character styles
+
+Define a named character style in the theme and reference it from a simple inline span:
+
+```yaml
+twig_to_word:
+  themes:
+    default:
+      styles:
+        Important:
+          type: character
+          font:
+            bold: true
+            color: C00000
+```
+
+```html
+<p>Read the <span data-docx-style="Important">important</span> notice.</p>
+```
+
+The exported span references Word's native `Important` character style, so updating the style in Word updates its occurrences. For now this direct style reference applies to a simple text-only span without additional inline overrides; nested markup uses the existing inline-formatting fallback.
+
+### CI concurrency
+
+The GitHub Actions workflow uses a concurrency group per pull request or branch and `cancel-in-progress: true`. Pushing a newer commit cancels any superseded run for that PR or branch. The PHP 8.2/8.3/8.4 matrix uses `fail-fast: false` so a test failure on one PHP version does not cancel diagnostics for the others.
