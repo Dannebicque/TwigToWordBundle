@@ -54,10 +54,17 @@ final class HtmlDocumentInterpreter
         // HTML parsing does not declare the id attribute as an XML ID.
         // Locate our wrapper deterministically instead of relying on getElementById().
         $root = (new \DOMXPath($dom))->query('//*[@id="twig-to-word-root"]')->item(0);
-        if ($root !== null) {
-            $this->renderChildren($root, $section, $styles);
+        try {
+            if ($root !== null) {
+                $this->renderChildren($root, $section, $styles);
+            }
+            return $document;
+        } catch (\\Throwable $exception) {
+            $this->cleanup($document);
+            throw $exception;
+        } finally {
+            $this->currentDocumentId = null;
         }
-        return $document;
     }
 
     /** @param array<string, mixed> $styles */
