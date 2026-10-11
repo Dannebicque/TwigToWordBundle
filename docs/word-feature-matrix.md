@@ -106,3 +106,9 @@ twig_to_word:
 ```
 
 Image resolution is relative to the configured directories. The default allowlist is empty: **images are disabled unless explicitly configured**. The resolver verifies the canonical path using `realpath` (including symlink escapes), rejects URL schemes and data URIs, checks file size, MIME type and image dimensions, and accepts only PNG, JPEG and GIF. No network access is performed. Unsupported images are skipped. For untrusted concurrently writable asset directories, avoid accepting user-controlled symlinks or file replacements between validation and DOCX writing.
+
+## Image packaging verification
+
+`tests/DocxImageTest.php` writes a real DOCX and checks that `word/media/` contains the embedded image, `word/_rels/document.xml.rels` declares an image relationship and `word/document.xml` references drawing markup. This is stronger than only checking the PHPWord object tree; it is not a visual Word/LibreOffice rendering test.
+
+For security, absolute paths and `.` / `..` path segments are rejected, even if they would resolve within an allowlisted directory. The current implementation still uses the validated pathname when PHPWord writes the DOCX, so there is a residual time-of-check/time-of-use race if untrusted processes can replace the source file. Keep the asset directory read-only during generation; a snapshot-to-private-temporary-file strategy is planned.
