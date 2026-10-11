@@ -81,3 +81,22 @@ MIT (license file to be added before release).
 ## Important: style registry lifecycle
 
 PHPWord stores named styles in a process-wide registry. TwigToWordBundle currently resets it at the beginning of each conversion. When generating multiple documents with different themes, **save each DOCX before creating the next**. Keeping several unfinished documents in memory is not supported yet. See [architecture notes](docs/architecture.md).
+
+## Headers, footers and page numbers
+
+Theme configuration supports optional `header` and `footer` entries:
+
+```yaml
+twig_to_word:
+  themes:
+    default:
+      header:
+        text: 'University report'
+        alignment: right
+      footer:
+        text: 'Page'
+        alignment: center
+        page_numbers: true
+```
+
+The page number is a native Word `PAGE` field, not a fixed number. Header/footer text is plain text (not interpreted as HTML); alignment can be `left`, `center`, or `right`.
