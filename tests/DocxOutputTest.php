@@ -43,14 +43,17 @@ final class DocxOutputTest extends TestCase
                 $xpath = new \DOMXPath($stylesXml);
                 $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
                 self::assertGreaterThan(0, $xpath->query('//w:style[@w:styleId="ReportTitle"]')->length);
-                // The custom paragraph style and its font formatting both survive export.
+                // Font and paragraph formatting must be in the SAME native paragraph style.
+                self::assertSame(1, $xpath->query('//w:style[@w:styleId="ReportTitle" and @w:type="paragraph"]/w:rPr/w:b')->length);
+                self::assertSame(1, $xpath->query('//w:style[@w:styleId="ReportTitle"]/w:rPr/w:color[@w:val="17365D"]')->length);
+                self::assertSame(1, $xpath->query('//w:style[@w:styleId="ReportTitle"]/w:pPr/w:jc[@w:val="center"]')->length);
 
                 $xpath = new \DOMXPath($documentXml);
                 $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
                 self::assertGreaterThan(0, $xpath->query('//w:pStyle[@w:val="ReportTitle"]')->length);
                 self::assertGreaterThan(0, $xpath->query('//w:t[text()="Rapport"]')->length);
-                self::assertGreaterThan(0, $xpath->query('//w:r[w:t="Rapport"]/w:rPr/w:b')->length);
-                self::assertGreaterThan(0, $xpath->query('//w:r[w:t="Rapport"]/w:rPr/w:color[@w:val="17365D"]')->length);
+                self::assertSame(0, $xpath->query('//w:r[w:t="Rapport"]/w:rPr/w:b')->length);
+                self::assertSame(0, $xpath->query('//w:r[w:t="Rapport"]/w:rPr/w:color')->length);
             } finally {
                 $zip->close();
             }
