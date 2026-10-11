@@ -13,7 +13,7 @@ final class MultipleSectionsTest extends TestCase
     {
         $word = (new HtmlDocumentInterpreter())->fromHtml(
             '<h1>Introduction</h1>'.
-            '<div data-docx-section-break data-docx-orientation="landscape" data-docx-margin-left="900" data-docx-margin-right="900"><h2>Wide table</h2></div>'.
+            '<div data-docx-section-break data-docx-orientation="landscape" data-docx-margin-left="900" data-docx-margin-right="900" data-docx-header-text="Landscape results" data-docx-footer-text="Confidential"><h2>Wide table</h2></div>'.
             '<p>Continuation in landscape</p>'.
             '<div data-docx-section-break data-docx-orientation="portrait"><p>Annex</p></div>'
         );
@@ -33,6 +33,16 @@ final class MultipleSectionsTest extends TestCase
                 self::assertStringContainsString('Wide table', $xml);
                 self::assertStringContainsString('Continuation in landscape', $xml);
                 self::assertStringContainsString('Annex', $xml);
+                $headers = [];
+                $footers = [];
+                for ($i = 1; $i <= 4; ++$i) {
+                    $header = $zip->getFromName('word/header'.$i.'.xml');
+                    $footer = $zip->getFromName('word/footer'.$i.'.xml');
+                    if (is_string($header)) { $headers[] = $header; }
+                    if (is_string($footer)) { $footers[] = $footer; }
+                }
+                self::assertStringContainsString('Landscape results', implode('', $headers));
+                self::assertStringContainsString('Confidential', implode('', $footers));
             } finally {
                 $zip->close();
             }
