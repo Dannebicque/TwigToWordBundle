@@ -3,11 +3,11 @@ declare(strict_types=1);
 namespace Davidannebicque\TwigToWordBundle\Html;
 
 use PhpOffice\PhpWord\PhpWord;
+use Davidannebicque\TwigToWordBundle\Word\WordStyleRegistrar;
 use Davidannebicque\TwigToWordBundle\Html\Handler\TableHandler;
 use Davidannebicque\TwigToWordBundle\Html\Handler\ParagraphHandler;
 use Davidannebicque\TwigToWordBundle\Html\Handler\ListHandler;
 use PhpOffice\PhpWord\Element\Section;
-use PhpOffice\PhpWord\Element\TextRun;
 
 final class HtmlDocumentInterpreter
 {
@@ -16,19 +16,7 @@ final class HtmlDocumentInterpreter
     {
         $document = new PhpWord();
         $styles = $theme['styles'] ?? [];
-        foreach ($styles as $name => $definition) {
-            if (!is_array($definition)) { continue; }
-            $font = $definition['font'] ?? [];
-            $fontStyle = [
-                'bold' => $font['bold'] ?? false,
-                'size' => $font['size'] ?? 11,
-                'color' => ltrim((string) ($font['color'] ?? '000000'), '#'),
-            ];
-            $paragraph = $definition['paragraph'] ?? [];
-            if (!is_array($paragraph)) { $paragraph = []; }
-            $document->addParagraphStyle((string) $name, $paragraph);
-            $document->addFontStyle((string) $name.'_font', $fontStyle);
-        }
+        (new WordStyleRegistrar())->register($document, is_array($styles) ? $styles : []);
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
         try {
