@@ -34,3 +34,7 @@ The long-term solution is a document-scoped style naming strategy or an isolated
 ## Current style limitation
 
 PHPWord can register a font style with paragraph properties under a single name (`addFontStyle($name, $font, $paragraph)`). Its Word2007 writer serializes this combination as a native `w:style` of type `paragraph`, with both `w:pPr` and `w:rPr`. The paragraph handler now references that style without duplicating its font properties on each text run. As a result, changing the paragraph style in Word updates all unoverridden occurrences. Explicit inline markup still produces direct run formatting. `tests/DocxOutputTest.php` checks both the style definition and the absence of redundant run-level bold/color.
+
+## Native character-style export compatibility
+
+PHPWord 1.3 writes character-style definitions without `w:styleId` in some cases, although text runs reference that identifier through `w:rStyle`. `CharacterStyleDocxFixer` repairs the generated `word/styles.xml` after saving, adding the missing identifier for valid, named character styles. The fix runs through `WordRenderer::save()`; consumers who call `IOFactory::createWriter()` directly must run the fixer themselves. This is an OOXML compatibility workaround, not a replacement for PHPWord's writer. Tests inspect the repaired DOCX ZIP.
