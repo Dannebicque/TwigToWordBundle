@@ -9,7 +9,8 @@ namespace Davidannebicque\TwigToWordBundle\Word;
  */
 final class CharacterStyleDocxFixer
 {
-    public function fix(string $path): void
+    /** @param array<string, string> $nextStyles */
+    public function fix(string $path, array $nextStyles = []): void
     {
         $zip = new \ZipArchive();
         if ($zip->open($path) !== true) {
@@ -37,6 +38,22 @@ final class CharacterStyleDocxFixer
                     continue;
                 }
                 $style->setAttributeNS($namespace, 'w:styleId', $id);
+                $changed = true;
+            }
+            foreach ($nextStyles as $styleId => $nextId) {
+                if (!preg_match('/^[A-Za-z][A-Za-z0-9_]{0,99}$/D', $styleId)
+                    || !preg_match('/^[A-Za-z][A-Za-z0-9_]{0,99}$/D', $nextId)) {
+                    throw new \InvalidArgumentException('Invalid Word style relation identifier.');
+                }
+                $matches = $xpath->query('//w:style[@w:type="paragraph" and @w:styleId="'.$styleId.'"]');
+                $style = $matches->item(0);
+                if (!$style instanceof \DOMElement) { continue; }
+                $next = $xpath->query('./w:next', $style)->item(0);
+                if (!$next instanceof \DOMElement) {
+                    $next = $dom->createElementNS($namespace, 'w:next');
+                    $style->appendChild($next);
+                }
+                $next->setAttributeNS($namespace, 'w:val', $nextId);
                 $changed = true;
             }
             if ($changed) {
