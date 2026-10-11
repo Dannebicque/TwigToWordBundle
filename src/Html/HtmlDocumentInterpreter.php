@@ -49,7 +49,7 @@ final class HtmlDocumentInterpreter
             libxml_use_internal_errors($previous);
         }
         $sectionOptions = $theme['document'] ?? [];
-        $section = $document->addSection(is_array($sectionOptions) ? array_intersect_key($sectionOptions, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight'])) : []);
+        $section = $document->addSection(is_array($sectionOptions) ? array_intersect_key($sectionOptions, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'differentFirstPage'])) : []);
         (new HeaderFooterRenderer())->apply($section, $theme);
         // HTML parsing does not declare the id attribute as an XML ID.
         // Locate our wrapper deterministically instead of relying on getElementById().
