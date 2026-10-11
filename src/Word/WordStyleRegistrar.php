@@ -4,13 +4,24 @@ declare(strict_types=1);
 namespace Davidannebicque\TwigToWordBundle\Word;
 
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Style;
 
 /**
  * Registers editable Word paragraph and character styles on a fresh document.
- * Themes are resolved before registration; no styles leak between documents.
+ * Themes are resolved before registration. PHPWord's static style registry
+ * requires explicit isolation when creating successive documents.
  */
 final class WordStyleRegistrar
 {
+    /**
+     * PHPWord stores named styles in a process-wide registry. Resetting it
+     * before each document prevents accidental theme carry-over in workers.
+     */
+    public function reset(): void
+    {
+        Style::resetStyles();
+    }
+
     /** @param array<string, mixed> $styles */
     public function register(PhpWord $document, array $styles): void
     {
