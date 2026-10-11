@@ -13,7 +13,6 @@ final class HtmlDocumentInterpreter
     {
         $document = new PhpWord();
         $styles = $theme['styles'] ?? [];
-        $fontStyles = [];
         foreach ($styles as $name => $definition) {
             if (!is_array($definition)) { continue; }
             $font = $definition['font'] ?? [];
@@ -22,9 +21,10 @@ final class HtmlDocumentInterpreter
                 'size' => $font['size'] ?? 11,
                 'color' => ltrim((string) ($font['color'] ?? '000000'), '#'),
             ];
-            $document->addParagraphStyle((string) $name, $definition['paragraph'] ?? []);
+            $paragraph = $definition['paragraph'] ?? [];
+            if (!is_array($paragraph)) { $paragraph = []; }
+            $document->addParagraphStyle((string) $name, $paragraph);
             $document->addFontStyle((string) $name.'_font', $fontStyle);
-            $fontStyles[(string) $name] = $fontStyle;
         }
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
@@ -34,7 +34,8 @@ final class HtmlDocumentInterpreter
             libxml_clear_errors();
             libxml_use_internal_errors($previous);
         }
-        $section = $document->addSection();
+        $sectionOptions = $theme['document'] ?? [];
+        $section = $document->addSection(is_array($sectionOptions) ? array_intersect_key($sectionOptions, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight'])) : []);
         $root = $dom->getElementById('twig-to-word-root');
         if ($root !== null) {
             $this->renderChildren($root, $section, $styles);
@@ -56,7 +57,7 @@ final class HtmlDocumentInterpreter
             if (in_array($tag, ['h1','h2','h3','h4','h5','h6','p'], true)) {
                 $style = $child->getAttribute('data-docx-style');
                 $run = $section->addTextRun($style !== '' ? $style : null);
-                $baseFont = ($style !== '' && isset($styles[$style]['font'])) ? $this->normalizeFont($styles[$style]['font']) : [];
+                $baseFont = ($style !== '' && isset($styles[$style]['font']) && is_array($styles[$style]['font'])) ? $this->normalizeFont($styles[$style]['font']) : [];
                 $this->renderInline($child, $run, $baseFont, $styles);
             } elseif ($tag === 'table') {
                 $table = $section->addTable();
@@ -106,7 +107,7 @@ final class HtmlDocumentInterpreter
             if ($tag === 'u') { $next['underline'] = 'single'; }
             if ($tag === 'br') { $run->addTextBreak(); continue; }
             $named = $child->getAttribute('data-docx-style');
-            if ($named !== '' && isset($styles[$named]['font'])) {
+            if ($named !== '' && isset($styles[$named]['font']) && is_array($styles[$named]['font'])) {
                 $font = $styles[$named]['font'];
                 $next = array_merge($next, array_filter([
                     'bold' => $font['bold'] ?? null,
@@ -115,6 +116,8 @@ final class HtmlDocumentInterpreter
                     'color' => isset($font['color']) ? ltrim((string) $font['color'], '#') : null,
                 ], static fn ($v) => $v !== null));
             }
+            if ($child->hasAttribute('data-docx-font-color')) { $next['color'] = ltrim($child->getAttribute('data-docx-font-color'), '#'); }
+            if ($child->hasAttribute('data-docx-font-bold')) { $next['bold'] = $child->getAttribute('data-docx-font-bold') === 'true'; }
             $this->renderInline($child, $run, $next, $styles);
         }
     }
