@@ -105,9 +105,11 @@ final class HtmlDocumentInterpreter
                 $section = $document->addSection(array_intersect_key($options, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'differentFirstPage'])));
                 $sectionTheme = $theme;
                 foreach (['header', 'footer'] as $part) {
-                    $override = $child->getAttribute('data-docx-'.$part.'-text');
-                    if ($override !== '') {
-                        $sectionTheme[$part] = ['text' => $override];
+                    $attribute = 'data-docx-'.$part.'-text';
+                    if ($child->hasAttribute($attribute)) {
+                        $override = $child->getAttribute($attribute);
+                        $existing = $sectionTheme[$part] ?? [];
+                        $sectionTheme[$part] = array_replace(is_array($existing) ? $existing : [], ['text' => $override]);
                     }
                 }
                 (new HeaderFooterRenderer())->apply($section, $sectionTheme);
