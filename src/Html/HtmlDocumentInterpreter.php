@@ -47,6 +47,15 @@ final class HtmlDocumentInterpreter
             if (!$child instanceof \DOMElement) { continue; }
             $tag = strtolower($child->tagName);
             if (in_array($tag, ['script', 'style'], true)) { continue; }
+            if ($child->hasAttribute('data-docx-toc')) {
+                $min = (int) ($child->getAttribute('data-docx-toc-min') ?: 1);
+                $max = (int) ($child->getAttribute('data-docx-toc-max') ?: 3);
+                if ($min < 1 || $max > 9 || $min > $max) {
+                    throw new \InvalidArgumentException('Invalid table of contents heading range.');
+                }
+                $section->addTOC(null, $min, $max);
+                continue;
+            }
             if ($tag === 'div' && $child->hasAttribute('data-docx-page-break')) {
                 $section->addPageBreak();
                 continue;
