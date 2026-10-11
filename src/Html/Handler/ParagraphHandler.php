@@ -22,8 +22,9 @@ final class ParagraphHandler implements BlockHandlerInterface
             return;
         }
         $run = $section->addTextRun($style !== '' ? $style : null);
-        // The paragraph's named Word style supplies the base font.
-        // Only inline markup and explicit local overrides create run formatting.
-        (new InlineTextRenderer())->render($element, $run, [], $styles);
+        // PHPWord does not combine custom paragraph and font styles automatically.
+        // Apply the named font as editable run formatting while retaining the paragraph style.
+        $font = isset($styles[$style]['font']) && is_array($styles[$style]['font']) ? $styles[$style]['font'] : [];
+        (new InlineTextRenderer())->render($element, $run, $font, $styles);
     }
 }
