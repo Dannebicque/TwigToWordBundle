@@ -12,6 +12,13 @@ final class Configuration implements ConfigurationInterface
         $tree = new TreeBuilder('twig_to_word');
         $tree->getRootNode()->children()
             ->scalarNode('default_theme')->defaultValue('default')->end()
+            ->arrayNode('images')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->arrayNode('allowed_directories')->scalarPrototype()->end()->defaultValue([])->end()
+                    ->integerNode('max_bytes')->min(1)->defaultValue(5242880)->end()
+                ->end()
+            ->end()
             ->arrayNode('themes')
                 ->useAttributeAsKey('name')
                 ->arrayPrototype()
