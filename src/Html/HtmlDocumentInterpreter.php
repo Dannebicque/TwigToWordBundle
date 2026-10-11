@@ -56,7 +56,7 @@ final class HtmlDocumentInterpreter
         $root = (new \DOMXPath($dom))->query('//*[@id="twig-to-word-root"]')->item(0);
         try {
             if ($root !== null) {
-                $this->renderChildren($root, $section, $styles);
+                $this->renderChildren($root, $section, $styles, $document, $theme, is_array($sectionOptions) ? $sectionOptions : []);
             }
             return $document;
         } catch (\Throwable $exception) {
@@ -68,7 +68,7 @@ final class HtmlDocumentInterpreter
     }
 
     /** @param array<string, mixed> $styles */
-    private function renderChildren(\DOMNode $node, Section $section, array $styles): void
+    private function renderChildren(\DOMNode $node, Section $section, array $styles, PhpWord $document, array $theme, array $sectionOptions): Section
     {
         foreach ($node->childNodes as $child) {
             if (!$child instanceof \DOMElement) { continue; }
@@ -81,6 +81,20 @@ final class HtmlDocumentInterpreter
                     throw new \InvalidArgumentException('Invalid table of contents heading range.');
                 }
                 $section->addTOC(null, null, $min, $max);
+                continue;
+            }
+            if ($child->hasAttribute('data-docx-section-break')) {
+                $options = $sectionOptions;
+                $orientation = $child->getAttribute('data-docx-orientation');
+                if ($orientation !== '') {
+                    if (!in_array($orientation, ['portrait', 'landscape'], true)) {
+                        throw new \InvalidArgumentException('Invalid Word section orientation.');
+                    }
+                    $options['orientation'] = $orientation;
+                }
+                $section = $document->addSection(array_intersect_key($options, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'differentFirstPage'])));
+                (new HeaderFooterRenderer())->apply($section, $theme);
+                $section = $this->renderChildren($child, $section, $styles, $document, $theme, $options);
                 continue;
             }
             if ($tag === 'div' && $child->hasAttribute('data-docx-page-break')) {
@@ -101,9 +115,10 @@ final class HtmlDocumentInterpreter
                 }
             }
             if (!$handled) {
-                $this->renderChildren($child, $section, $styles);
+                $section = $this->renderChildren($child, $section, $styles, $document, $theme, $sectionOptions);
             }
         }
+        return $section;
     }
 
 }
