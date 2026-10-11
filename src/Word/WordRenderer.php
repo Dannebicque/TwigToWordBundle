@@ -35,7 +35,7 @@ final class WordRenderer
     }
 
     /** @param array<string, mixed> $context */
-    public function renderFromTemplate(string $template, array $context, string $filename, string $theme = 'default'): BinaryFileResponse
+    public function renderFromTemplate(string $template, array $context, string $filename, ?string $theme = null): BinaryFileResponse
     {
         $path = tempnam(sys_get_temp_dir(), 'twig_word_');
         if ($path === false) { throw new \RuntimeException('Cannot create temporary DOCX file.'); }
