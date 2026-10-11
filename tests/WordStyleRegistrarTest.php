@@ -19,7 +19,9 @@ final class WordStyleRegistrarTest extends TestCase
             ],
         ]);
         self::assertNotNull(Style::getStyle('ReportTitle'));
-        self::assertNotNull(Style::getStyle('ReportTitle_font'));
+        self::assertNull(Style::getStyle('ReportTitle_font'));
+        self::assertInstanceOf(\PhpOffice\PhpWord\Style\Font::class, Style::getStyle('ReportTitle'));
+        self::assertNotNull(Style::getStyle('ReportTitle')->getParagraph());
     }
 
     public function testRejectsInvalidStyleDefinition(): void
