@@ -13,6 +13,15 @@ use PhpOffice\PhpWord\Style;
  */
 final class WordStyleRegistrar
 {
+    /** @var ?\\WeakMap<PhpWord, array<string, string>> */
+    private static ?\\WeakMap $nextStyles = null;
+
+    /** @return array<string, string> */
+    public static function nextStyles(PhpWord $document): array
+    {
+        return self::$nextStyles[$document] ?? [];
+    }
+
     /**
      * PHPWord stores named styles in a process-wide registry. Resetting it
      * before each document prevents accidental theme carry-over in workers.
@@ -26,6 +35,8 @@ final class WordStyleRegistrar
     public function register(PhpWord $document, array $styles): void
     {
         $this->validateRelations($styles);
+        self::$nextStyles ??= new \\WeakMap();
+        self::$nextStyles[$document] = [];
         foreach ($styles as $name => $definition) {
             if (!is_string($name) || !is_array($definition)) {
                 continue;
@@ -70,6 +81,11 @@ final class WordStyleRegistrar
                 $document->addTitleStyle((int) $matches[1], $this->fontOptions($font), $paragraph);
             } else {
                 if ($font !== []) {
+                    if (isset($paragraph['next'])) {
+                        $next = self::$nextStyles[$document];
+                        $next[$name] = $paragraph['next'];
+                        self::$nextStyles[$document] = $next;
+                    }
                     $document->addFontStyle($name, $this->fontOptions($font), $paragraph);
                 } else {
                     $document->addParagraphStyle($name, $paragraph);
