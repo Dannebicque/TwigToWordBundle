@@ -16,7 +16,8 @@ final class ParagraphHandler implements BlockHandlerInterface
             $style = 'Heading'.substr($tag, 1);
         }
         $run = $section->addTextRun($style !== '' ? $style : null);
-        $font = $styles[$style]['font'] ?? [];
-        (new InlineTextRenderer())->render($element, $run, is_array($font) ? $font : [], $styles);
+        // The paragraph's named Word style supplies the base font.
+        // Only inline markup and explicit local overrides create run formatting.
+        (new InlineTextRenderer())->render($element, $run, [], $styles);
     }
 }
