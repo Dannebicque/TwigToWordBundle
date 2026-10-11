@@ -92,6 +92,16 @@ final class HtmlDocumentInterpreter
                     }
                     $options['orientation'] = $orientation;
                 }
+                foreach (['marginTop', 'marginBottom', 'marginLeft', 'marginRight'] as $margin) {
+                    $attribute = 'data-docx-'.strtolower(preg_replace('/[A-Z]/', '-$0', $margin));
+                    $value = $child->getAttribute($attribute);
+                    if ($value !== '') {
+                        if (!ctype_digit($value) || (int) $value > 20000) {
+                            throw new \InvalidArgumentException('Invalid Word section margin: '.$margin);
+                        }
+                        $options[$margin] = (int) $value;
+                    }
+                }
                 $section = $document->addSection(array_intersect_key($options, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'differentFirstPage'])));
                 (new HeaderFooterRenderer())->apply($section, $theme);
                 $section = $this->renderChildren($child, $section, $styles, $document, $theme, $options);
