@@ -14,7 +14,11 @@ final class TableHandler implements BlockHandlerInterface
 
     public function render(\DOMElement $element, Section $section, array $styles): void
     {
-        $table = $section->addTable();
+        $styleName = $element->getAttribute('data-docx-style');
+        if ($styleName !== '' && ($styles[$styleName]['type'] ?? null) !== 'table') {
+            throw new \InvalidArgumentException(sprintf('Unknown Word table style "%s".', $styleName));
+        }
+        $table = $section->addTable($styleName !== '' ? $styleName : null);
         // Column-indexed spans carried over from previous rows.
         // Each span is represented once at its starting column.
         $pendingRowspans = [];
