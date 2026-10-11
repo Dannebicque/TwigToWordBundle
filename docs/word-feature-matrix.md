@@ -154,3 +154,7 @@ The interpreter now cleans its tracked temporary image snapshots if HTML convers
 ## Multiple Word sections
 
 `data-docx-section-break` starts a new editable Word section. The optional `data-docx-orientation="landscape"` or `"portrait"` overrides the previous orientation; content following the marker stays in that section until the next marker. Section-level headers/footers are reapplied from the theme. `tests/MultipleSectionsTest.php` checks the generated DOCX and rejects invalid orientation values. Section-specific margins, header/footer variants, and continuous section breaks remain future enhancements.
+
+## Section overrides
+
+Section markers accept `data-docx-margin-top`, `data-docx-margin-bottom`, `data-docx-margin-left`, `data-docx-margin-right` (twips, 0–20000), `data-docx-header-text`, and `data-docx-footer-text`. Header/footer overrides create editable text in their respective section. The corresponding DOCX media and section tests cover serialization. The initial theme remains the default for the first section.
