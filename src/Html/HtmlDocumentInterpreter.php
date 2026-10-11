@@ -8,10 +8,13 @@ use Davidannebicque\TwigToWordBundle\Word\HeaderFooterRenderer;
 use Davidannebicque\TwigToWordBundle\Html\Handler\TableHandler;
 use Davidannebicque\TwigToWordBundle\Html\Handler\ParagraphHandler;
 use Davidannebicque\TwigToWordBundle\Html\Handler\ListHandler;
+use Davidannebicque\TwigToWordBundle\Html\Handler\ImageHandler;
 use PhpOffice\PhpWord\Element\Section;
 
 final class HtmlDocumentInterpreter
 {
+    public function __construct(private readonly ?SafeImageResolver $images = null) {}
+
     /** @param array<string, mixed> $theme */
     public function fromHtml(string $html, array $theme = []): PhpWord
     {
@@ -65,7 +68,7 @@ final class HtmlDocumentInterpreter
                 $section->addPageBreak();
                 continue;
             }
-            $handlers = [new ParagraphHandler(), new TableHandler(), new ListHandler()];
+            $handlers = [new ParagraphHandler(), new TableHandler(), new ListHandler(), new ImageHandler($this->images ?? new SafeImageResolver())];
             $handled = false;
             foreach ($handlers as $handler) {
                 if ($handler->supports($child)) {
