@@ -32,7 +32,7 @@ final class SafeImageResolver
                 fclose($output);
             }
             if ($copied === false || $copied < 1 || $copied > $this->maxBytes) { return null; }
-            $mime = (new \\finfo(FILEINFO_MIME_TYPE))->file($temporary);
+            $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($temporary);
             if (!in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)) { return null; }
             $info = @getimagesize($temporary);
             if ($info === false || $info[0] < 1 || $info[1] < 1 || $info[0] > 10000 || $info[1] > 10000) { return null; }
