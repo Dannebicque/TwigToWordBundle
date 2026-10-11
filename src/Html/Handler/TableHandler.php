@@ -22,7 +22,7 @@ final class TableHandler implements BlockHandlerInterface
         // Column-indexed spans carried over from previous rows.
         // Each span is represented once at its starting column.
         $pendingRowspans = [];
-        foreach ($element->getElementsByTagName('tr') as $tr) {
+        foreach ($this->directRows($element) as $tr) {
             $table->addRow();
             $incoming = $pendingRowspans;
             $pendingRowspans = [];
@@ -72,6 +72,7 @@ final class TableHandler implements BlockHandlerInterface
                 $run = $wordCell->addTextRun();
                 (new InlineTextRenderer())->render($cell, $run, $isHeader ? ['bold' => true] : [], $styles);
             }
+            ksort($incoming);
             foreach ($incoming as $start => $span) {
                 if ($start < $column) {
                     throw new \InvalidArgumentException('Overlapping table row spans.');
@@ -80,5 +81,23 @@ final class TableHandler implements BlockHandlerInterface
                 $column = $start + $span['width'];
             }
         }
+    }
+
+    /** @return list<\DOMElement> */
+    private function directRows(\DOMElement $table): array
+    {
+        $rows = [];
+        foreach ($table->childNodes as $child) {
+            if (!$child instanceof \DOMElement) { continue; }
+            $tag = strtolower($child->tagName);
+            if ($tag === 'tr') { $rows[] = $child; continue; }
+            if (!in_array($tag, ['thead', 'tbody', 'tfoot'], true)) { continue; }
+            foreach ($child->childNodes as $row) {
+                if ($row instanceof \DOMElement && strtolower($row->tagName) === 'tr') {
+                    $rows[] = $row;
+                }
+            }
+        }
+        return $rows;
     }
 }
