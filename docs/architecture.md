@@ -18,7 +18,7 @@ The parser uses `LIBXML_NONET`. Remote resources are not fetched by the current 
 
 - Complete named Word paragraph/character/table styles
 - Separate element handlers and document AST
-- Add safe image handling, headers/footers, sections, table merging
+- Expand safe image handling, section-specific headers/footers, and complex table merging
 - Integration tests inspecting the generated DOCX XML
 
 ## PHPWord style lifecycle
@@ -33,4 +33,4 @@ The long-term solution is a document-scoped style naming strategy or an isolated
 
 ## Current style limitation
 
-The registrar now puts theme font properties inside the named paragraph style instead of registering a detached `<name>_font` style. The paragraph handler no longer applies the base theme font directly to every text run. Explicit inline markup and local overrides still create run-level formatting. DOCX XML tests must confirm the intended inheritance is serialized by PHPWord.
+PHPWord registers custom paragraph and character styles separately. The registrar creates the named paragraph style and an auxiliary `<name>_font` character style. To ensure reliable formatting, the paragraph handler currently applies the theme font as direct editable run properties. This is not native Word style inheritance. `tests/DocxOutputTest.php` verifies the paragraph style reference and the bold/color run properties in exported OOXML.
