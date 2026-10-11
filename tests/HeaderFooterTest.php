@@ -20,7 +20,7 @@ final class HeaderFooterTest extends TestCase
         self::assertNotFalse($path);
         try {
             IOFactory::createWriter($word, 'Word2007')->save($path);
-            $zip = new \\ZipArchive();
+            $zip = new \ZipArchive();
             self::assertTrue($zip->open($path) === true);
             try {
                 $document = $zip->getFromName('word/document.xml');
