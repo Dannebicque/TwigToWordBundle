@@ -12,6 +12,7 @@ final class HeaderFooterTest extends TestCase
     public function testFirstPageAndTotalPageFieldsAreSerialized(): void
     {
         $word = (new HtmlDocumentInterpreter())->fromHtml('<p>Cover</p>', [
+            'document' => ['differentFirstPage' => true],
             'header' => ['text' => 'Cover header', 'first_page' => true],
             'footer' => ['text' => 'Page', 'page_numbers' => true, 'total_pages' => true],
         ]);
@@ -29,6 +30,7 @@ final class HeaderFooterTest extends TestCase
                 self::assertStringContainsString('NUMPAGES', $footer);
                 self::assertStringContainsString('PAGE', $footer);
                 self::assertStringContainsString('first', $document);
+                self::assertStringContainsString('titlePg', $document);
             } finally {
                 $zip->close();
             }
