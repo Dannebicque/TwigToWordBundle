@@ -15,6 +15,12 @@ final class ParagraphHandler implements BlockHandlerInterface
         if ($style === '' && strlen($tag) === 2 && $tag[0] === 'h') {
             $style = 'Heading'.substr($tag, 1);
         }
+        // PHPWord TOC indexes Title elements, not ordinary TextRuns
+        // with a Heading paragraph style.
+        if (preg_match('/^h([1-6])$/', $tag, $matches) && ($style === 'Heading'.$matches[1])) {
+            $section->addTitle(trim($element->textContent), (int) $matches[1]);
+            return;
+        }
         $run = $section->addTextRun($style !== '' ? $style : null);
         // The paragraph's named Word style supplies the base font.
         // Only inline markup and explicit local overrides create run formatting.
