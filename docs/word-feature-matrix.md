@@ -129,3 +129,24 @@ For security, absolute paths and `.` / `..` path segments are rejected, even if 
 ## Complex table merges and first-page fields
 
 Rowspan continuation is now emitted only on subsequent rows. Combined `rowspan` and `colspan` retain the `w:gridSpan` value on continuation cells; `tests/MergedTableDocxTest.php` checks each XML row separately to catch misplaced continuations. `tests/HeaderFooterTest.php` also checks `PAGE`, `NUMPAGES`, and first-page header references in exported DOCX files.
+
+## First-page headers
+
+For a first-page-specific header, configure the section's `differentFirstPage` option as well as `header.first_page`:
+
+```yaml
+twig_to_word:
+  themes:
+    default:
+      document:
+        differentFirstPage: true
+      header:
+        text: 'Cover page'
+        first_page: true
+```
+
+The exported `word/document.xml` should include `w:titlePg` and a header reference of type `first`. A first-page-only header is distinct from a regular header on later pages.
+
+## Error handling
+
+The interpreter now cleans its tracked temporary image snapshots if HTML conversion throws an exception, including invalid TOC ranges. `tests/RenderingFailureCleanupTest.php` checks this failure path. A successful direct PHPWord export still requires explicit `cleanup()` if `WordRenderer::save()` is not used.
