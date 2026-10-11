@@ -34,8 +34,13 @@ final class WordStyleRegistrar
             if (!is_array($paragraph) || !is_array($font)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
             }
+            // PHPWord's paragraph style supports a nested font definition.
+            // This produces a single editable Word paragraph style rather than
+            // a paragraph style plus unrelated character style.
+            if ($font !== []) {
+                $paragraph['font'] = $this->fontOptions($font);
+            }
             $document->addParagraphStyle($name, $paragraph);
-            $document->addFontStyle($name.'_font', $this->fontOptions($font));
         }
     }
 
