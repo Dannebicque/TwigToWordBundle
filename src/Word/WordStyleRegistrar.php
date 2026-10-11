@@ -34,6 +34,17 @@ final class WordStyleRegistrar
             if (!is_array($paragraph) || !is_array($font)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
             }
+            $type = $definition['type'] ?? 'paragraph';
+            if (!in_array($type, ['paragraph', 'character'], true)) {
+                throw new \InvalidArgumentException(sprintf('Invalid Word style type for "%s".', $name));
+            }
+            if ($type === 'character') {
+                if ($paragraph !== []) {
+                    throw new \InvalidArgumentException(sprintf('Character style "%s" cannot define paragraph properties.', $name));
+                }
+                $document->addFontStyle($name, $this->fontOptions($font));
+                continue;
+            }
             // A Font style with paragraph properties is serialized by PHPWord
             // as a single native Word paragraph style containing both w:pPr
             // and w:rPr. This makes typography editable through Word's styles.
