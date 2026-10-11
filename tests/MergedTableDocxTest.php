@@ -19,14 +19,14 @@ final class MergedTableDocxTest extends TestCase
         self::assertNotFalse($file);
         try {
             IOFactory::createWriter($word, 'Word2007')->save($file);
-            $zip = new \\ZipArchive();
+            $zip = new \ZipArchive();
             self::assertTrue($zip->open($file) === true);
             try {
                 $xml = $zip->getFromName('word/document.xml');
                 self::assertIsString($xml);
-                $dom = new \\DOMDocument();
+                $dom = new \DOMDocument();
                 self::assertTrue($dom->loadXML($xml, LIBXML_NONET));
-                $xpath = new \\DOMXPath($dom);
+                $xpath = new \DOMXPath($dom);
                 $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
                 $rows = $xpath->query('//w:tbl/w:tr');
                 self::assertCount(3, $rows);
