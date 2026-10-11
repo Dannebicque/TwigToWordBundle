@@ -222,3 +222,28 @@ twig_to_word:
 Apply it to HTML tables with `<table data-docx-style="ReportTable">...</table>`. The DOCX exports a named Word table style and a table reference to it. Invalid or unknown table style names are rejected.
 
 Character styles now also work with nested markup. For example, `<span data-docx-style="Important">Normal <em>emphasis</em> normal</span>` keeps native character-style references for the unchanged text while the emphasized segment receives the style's font properties and an italic override. This fallback is required because PHPWord's current run API does not combine a named character style and inline font overrides in one run.
+
+### Paragraph style inheritance and next style
+
+Styles can declare `basedOn` and `next` to establish native Word paragraph relationships:
+
+```yaml
+twig_to_word:
+  themes:
+    default:
+      styles:
+        Base:
+          paragraph:
+            alignment: left
+        Caption:
+          basedOn: Base
+          next: Base
+          paragraph:
+            spaceAfter: 120
+```
+
+The bundle validates parent/next references and rejects inheritance cycles. The `next` relation is currently emitted for paragraph-only styles; PHPWord's font+paragraph combined-style writer does not serialize `next` yet.
+
+### Complex HTML tables
+
+The table renderer processes direct `tr` children and rows inside `thead`, `tbody`, and `tfoot`. Rows belonging to nested tables no longer leak into the parent table's row count. Nested table *text* is currently flattened into its containing cell; fully nested editable Word tables remain a separate feature.
