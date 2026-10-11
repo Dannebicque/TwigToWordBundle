@@ -29,7 +29,9 @@ final class HtmlDocumentInterpreter
         }
         $sectionOptions = $theme['document'] ?? [];
         $section = $document->addSection(is_array($sectionOptions) ? array_intersect_key($sectionOptions, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight'])) : []);
-        $root = $dom->getElementById('twig-to-word-root');
+        // HTML parsing does not declare the id attribute as an XML ID.
+        // Locate our wrapper deterministically instead of relying on getElementById().
+        $root = (new \DOMXPath($dom))->query('//*[@id="twig-to-word-root"]')->item(0);
         if ($root !== null) {
             $this->renderChildren($root, $section, $styles);
         }
