@@ -33,6 +33,7 @@ final class WordRenderer
     {
         try {
             IOFactory::createWriter($document, 'Word2007')->save($path);
+            (new CharacterStyleDocxFixer())->fix($path);
         } finally {
             $this->interpreter->cleanup($document);
         }
