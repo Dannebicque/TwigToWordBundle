@@ -77,3 +77,7 @@ vendor/bin/phpunit tests
 ## License
 
 MIT (license file to be added before release).
+
+## Important: style registry lifecycle
+
+PHPWord stores named styles in a process-wide registry. TwigToWordBundle currently resets it at the beginning of each conversion. When generating multiple documents with different themes, **save each DOCX before creating the next**. Keeping several unfinished documents in memory is not supported yet. See [architecture notes](docs/architecture.md).
