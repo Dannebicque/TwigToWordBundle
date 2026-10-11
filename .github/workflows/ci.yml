@@ -16,6 +16,8 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, libxml, zip, gd
           coverage: none
+      - name: Lint PHP syntax
+        run: find src tests -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer validate --strict
       - run: composer install --prefer-dist --no-interaction
       - run: vendor/bin/phpunit tests
