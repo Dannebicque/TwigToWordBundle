@@ -35,8 +35,17 @@ final class WordStyleRegistrar
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
             }
             $type = $definition['type'] ?? 'paragraph';
-            if (!in_array($type, ['paragraph', 'character'], true)) {
+            if (!in_array($type, ['paragraph', 'character', 'table'], true)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style type for "%s".', $name));
+            }
+            if ($type === 'table') {
+                $table = $definition['table'] ?? [];
+                $firstRow = $definition['first_row'] ?? [];
+                if (!is_array($table) || !is_array($firstRow) || $font !== [] || $paragraph !== []) {
+                    throw new \InvalidArgumentException(sprintf('Invalid table style "%s".', $name));
+                }
+                $document->addTableStyle($name, $table, $firstRow);
+                continue;
             }
             if ($type === 'character') {
                 if ($paragraph !== []) {
