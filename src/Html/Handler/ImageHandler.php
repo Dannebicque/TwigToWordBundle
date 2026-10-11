@@ -8,7 +8,8 @@ use PhpOffice\PhpWord\Element\Section;
 
 final class ImageHandler implements BlockHandlerInterface
 {
-    public function __construct(private readonly SafeImageResolver $images) {}
+    /** @param callable(string): void $trackTemporaryFile */
+    public function __construct(private readonly SafeImageResolver $images, private readonly \Closure $trackTemporaryFile) {}
 
     public function supports(\DOMElement $element): bool
     {
@@ -17,7 +18,7 @@ final class ImageHandler implements BlockHandlerInterface
 
     public function render(\DOMElement $element, Section $section, array $styles): void
     {
-        $path = $this->images->resolve(trim($element->getAttribute('src')));
+        $path = $this->images->snapshot(trim($element->getAttribute('src')));
         if ($path === null) {
             return;
         }
@@ -29,6 +30,7 @@ final class ImageHandler implements BlockHandlerInterface
                 $options[$dimension] = (int) $value;
             }
         }
+        ($this->trackTemporaryFile)($path);
         $section->addImage($path, $options);
     }
 }
