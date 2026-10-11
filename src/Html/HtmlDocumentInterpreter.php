@@ -103,8 +103,15 @@ final class HtmlDocumentInterpreter
                     }
                 }
                 $section = $document->addSection(array_intersect_key($options, array_flip(['orientation', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'differentFirstPage'])));
-                (new HeaderFooterRenderer())->apply($section, $theme);
-                $section = $this->renderChildren($child, $section, $styles, $document, $theme, $options);
+                $sectionTheme = $theme;
+                foreach (['header', 'footer'] as $part) {
+                    $override = $child->getAttribute('data-docx-'.$part.'-text');
+                    if ($override !== '') {
+                        $sectionTheme[$part] = ['text' => $override];
+                    }
+                }
+                (new HeaderFooterRenderer())->apply($section, $sectionTheme);
+                $section = $this->renderChildren($child, $section, $styles, $document, $sectionTheme, $options);
                 continue;
             }
             if ($tag === 'div' && $child->hasAttribute('data-docx-page-break')) {
