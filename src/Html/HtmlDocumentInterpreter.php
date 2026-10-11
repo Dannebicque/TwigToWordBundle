@@ -59,7 +59,7 @@ final class HtmlDocumentInterpreter
                 $this->renderChildren($root, $section, $styles);
             }
             return $document;
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             $this->cleanup($document);
             throw $exception;
         } finally {
