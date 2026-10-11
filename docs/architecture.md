@@ -33,4 +33,4 @@ The long-term solution is a document-scoped style naming strategy or an isolated
 
 ## Current style limitation
 
-The implementation registers paragraph styles as `<name>` and font styles as `<name>_font`. The paragraph renderer also applies theme font options as direct formatting on text runs. This means that changing a paragraph style in Word does **not** yet guarantee that all font formatting follows the named paragraph style. A future change should register combined paragraph/character styles with PHPWord's native style APIs and validate the resulting OOXML inheritance.
+The registrar now puts theme font properties inside the named paragraph style instead of registering a detached `<name>_font` style. The paragraph handler no longer applies the base theme font directly to every text run. Explicit inline markup and local overrides still create run-level formatting. DOCX XML tests must confirm the intended inheritance is serialized by PHPWord.
