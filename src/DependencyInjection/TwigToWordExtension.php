@@ -18,12 +18,17 @@ final class TwigToWordExtension extends Extension
         if (!isset($themes['default'])) {
             $themes['default'] = ['styles' => []];
         }
+        $defaultTheme = $config['default_theme'];
+        if (!isset($themes[$defaultTheme])) {
+            throw new \InvalidArgumentException(sprintf('Default Word theme "%s" is not configured.', $defaultTheme));
+        }
         $container->register(ThemeRegistry::class, ThemeRegistry::class)->setArgument(0, $themes);
         $container->register(HtmlDocumentInterpreter::class, HtmlDocumentInterpreter::class);
         $container->register(WordRenderer::class, WordRenderer::class)
             ->setPublic(true)
             ->setArgument(0, new Reference('twig'))
             ->setArgument(1, new Reference(HtmlDocumentInterpreter::class))
-            ->setArgument(2, new Reference(ThemeRegistry::class));
+            ->setArgument(2, new Reference(ThemeRegistry::class))
+            ->setArgument(3, $defaultTheme);
     }
 }
