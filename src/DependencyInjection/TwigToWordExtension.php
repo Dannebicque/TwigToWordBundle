@@ -13,12 +13,15 @@ final class TwigToWordExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $config = array_replace_recursive(...array_merge([[]], $configs));
-        $themes = $config['themes'] ?? ['default' => ['styles' => []]];
-        if (!isset($themes['default'])) { $themes['default'] = ['styles' => []]; }
+        $config = $this->processConfiguration(new Configuration(), $configs);
+        $themes = $config['themes'] ?? [];
+        if (!isset($themes['default'])) {
+            $themes['default'] = ['styles' => []];
+        }
         $container->register(ThemeRegistry::class, ThemeRegistry::class)->setArgument(0, $themes);
         $container->register(HtmlDocumentInterpreter::class, HtmlDocumentInterpreter::class);
         $container->register(WordRenderer::class, WordRenderer::class)
+            ->setPublic(true)
             ->setArgument(0, new Reference('twig'))
             ->setArgument(1, new Reference(HtmlDocumentInterpreter::class))
             ->setArgument(2, new Reference(ThemeRegistry::class));
