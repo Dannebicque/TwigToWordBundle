@@ -125,3 +125,7 @@ For security, absolute paths and `.` / `..` path segments are rejected, even if 
 - `tests/MergedTableDocxTest.php`: verifies merged-cell OOXML.
 
 **Important:** A DOCX containing embedded image snapshots must be saved before calling `HtmlDocumentInterpreter::cleanup()`. The bundle's `WordRenderer::save()` handles this automatically. Applications calling PHPWord's writer directly are responsible for cleanup.
+
+## Complex table merges and first-page fields
+
+Rowspan continuation is now emitted only on subsequent rows. Combined `rowspan` and `colspan` retain the `w:gridSpan` value on continuation cells; `tests/MergedTableDocxTest.php` checks each XML row separately to catch misplaced continuations. `tests/HeaderFooterTest.php` also checks `PAGE`, `NUMPAGES`, and first-page header references in exported DOCX files.
