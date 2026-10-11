@@ -34,7 +34,7 @@ final class InlineTextRenderer
             if ($named !== '' && ($styles[$named]['type'] ?? 'paragraph') === 'character'
                 && isset($styles[$named]['font']) && is_array($styles[$named]['font'])
                 && $child->childNodes->length === 1 && $child->firstChild instanceof \DOMText
-                && $font === [] && !$child->hasAttribute('data-docx-font-color')
+                && !$child->hasAttribute('data-docx-font-color')
                 && !$child->hasAttribute('data-docx-font-bold')) {
                 $run->addText($child->textContent, $named);
                 continue;
