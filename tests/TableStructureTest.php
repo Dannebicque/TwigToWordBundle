@@ -29,7 +29,9 @@ final class TableStructureTest extends TestCase
                 self::assertTrue($dom->loadXML($xml, LIBXML_NONET));
                 $xp = new \DOMXPath($dom);
                 $xp->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
-                self::assertSame(3, $xp->query('//w:tbl/w:tr')->length);
+                self::assertSame(3, $xp->query('//w:body/w:tbl/w:tr')->length);
+                self::assertSame(1, $xp->query('//w:body/w:tbl/w:tr/w:tc/w:tbl')->length);
+                self::assertSame(1, $xp->query('//w:body/w:tbl/w:tr/w:tc/w:tbl/w:tr')->length);
                 self::assertSame(1, $xp->query('//w:t[text()="Inner"]')->length);
                 self::assertSame(1, $xp->query('//w:t[text()="Header"]')->length);
                 self::assertSame(1, $xp->query('//w:t[text()="Footer"]')->length);
