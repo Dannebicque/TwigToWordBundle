@@ -152,4 +152,4 @@ Each `data-docx-section-break` creates a new Word section. Content after it cont
 </div>
 ```
 
-Margin attributes (`data-docx-margin-top`, `-bottom`, `-left`, `-right`) accept integer twips from 0 to 20000. Header/footer text overrides apply to the new section and remain editable. They replace the theme's configuration for that section; nested section breaks inherit the current override. For a different first-page header, use the theme's `document.differentFirstPage` and `header.first_page` settings.
+Margin attributes (`data-docx-margin-top`, `-bottom`, `-left`, `-right`) accept integer twips from 0 to 20000. Header/footer text overrides apply to the new section and remain editable. They override only the text while preserving other theme settings (such as alignment, page numbering and total-page fields). An explicitly empty attribute clears the text. Nested section breaks inherit the current override. For a different first-page header, use the theme's `document.differentFirstPage` and `header.first_page` settings.
