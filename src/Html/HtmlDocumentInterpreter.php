@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Davidannebicque\TwigToWordBundle\Html;
 
 use PhpOffice\PhpWord\PhpWord;
+use Davidannebicque\TwigToWordBundle\Html\Handler\TableHandler;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\Element\TextRun;
 
@@ -60,14 +61,7 @@ final class HtmlDocumentInterpreter
                 $baseFont = ($style !== '' && isset($styles[$style]['font']) && is_array($styles[$style]['font'])) ? $this->normalizeFont($styles[$style]['font']) : [];
                 $this->renderInline($child, $run, $baseFont, $styles);
             } elseif ($tag === 'table') {
-                $table = $section->addTable();
-                foreach ($child->getElementsByTagName('tr') as $tr) {
-                    $table->addRow();
-                    foreach ($tr->childNodes as $cell) {
-                        if (!$cell instanceof \DOMElement || !in_array(strtolower($cell->tagName), ['td','th'], true)) { continue; }
-                        $table->addCell()->addText(trim($cell->textContent));
-                    }
-                }
+                (new TableHandler())->render($child, $section, $styles);
             } elseif ($tag === 'ul' || $tag === 'ol') {
                 foreach ($child->childNodes as $li) {
                     if ($li instanceof \DOMElement && strtolower($li->tagName) === 'li') {
