@@ -1,0 +1,12 @@
+<h1 data-docx-style="title">{{ title }}</h1>
+<p>Rapport pour l'année {{ year }}.</p>
+<p><strong>Résumé :</strong> {{ summary }}</p>
+<table>
+    <tr><th>Nom</th><th>Valeur</th></tr>
+    {% for item in items %}
+    <tr><td>{{ item.name }}</td><td>{{ item.value }}</td></tr>
+    {% endfor %}
+</table>
+<div data-docx-page-break></div>
+<h2>Conclusion</h2>
+<p>{{ conclusion }}</p>
