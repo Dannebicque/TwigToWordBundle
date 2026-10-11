@@ -34,16 +34,17 @@ final class WordStyleRegistrar
             if (!is_array($paragraph) || !is_array($font)) {
                 throw new \InvalidArgumentException(sprintf('Invalid Word style "%s".', $name));
             }
-            // Native headings are registered as title styles so that Word's
-            // table of contents can reference them. Custom paragraph styles
-            // keep their paragraph properties; font properties are applied
-            // to editable runs by ParagraphHandler.
+            // A Font style with paragraph properties is serialized by PHPWord
+            // as a single native Word paragraph style containing both w:pPr
+            // and w:rPr. This makes typography editable through Word's styles.
+            // Headings use title styles for table-of-contents integration.
             if (preg_match('/^Heading([1-6])$/', $name, $matches)) {
                 $document->addTitleStyle((int) $matches[1], $this->fontOptions($font), $paragraph);
             } else {
-                $document->addParagraphStyle($name, $paragraph);
                 if ($font !== []) {
-                    $document->addFontStyle($name.'_font', $this->fontOptions($font));
+                    $document->addFontStyle($name, $this->fontOptions($font), $paragraph);
+                } else {
+                    $document->addParagraphStyle($name, $paragraph);
                 }
             }
         }
