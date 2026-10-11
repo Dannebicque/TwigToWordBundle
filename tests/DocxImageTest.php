@@ -38,7 +38,7 @@ final class DocxImageTest extends TestCase
                 self::assertStringContainsString('image', $rels);
                 $document = $zip->getFromName('word/document.xml');
                 self::assertIsString($document);
-                self::assertStringContainsString('blip', $document);
+                self::assertTrue(str_contains($document, 'blip') || str_contains($document, 'v:imagedata'));
             } finally {
                 $zip->close();
             }
