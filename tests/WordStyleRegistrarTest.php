@@ -4,6 +4,7 @@ namespace Davidannebicque\TwigToWordBundle\Tests;
 
 use Davidannebicque\TwigToWordBundle\Word\WordStyleRegistrar;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Style;
 use PHPUnit\Framework\TestCase;
 
 final class WordStyleRegistrarTest extends TestCase
@@ -17,8 +18,8 @@ final class WordStyleRegistrarTest extends TestCase
                 'font' => ['name' => 'Arial', 'size' => 22, 'bold' => true, 'color' => '#17365D'],
             ],
         ]);
-        self::assertNotNull($document->getStyle('ReportTitle'));
-        self::assertNotNull($document->getStyle('ReportTitle_font'));
+        self::assertNotNull(Style::getStyle('ReportTitle'));
+        self::assertNotNull(Style::getStyle('ReportTitle_font'));
     }
 
     public function testRejectsInvalidStyleDefinition(): void
