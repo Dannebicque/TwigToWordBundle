@@ -200,3 +200,25 @@ The exported span references Word's native `Important` character style, so updat
 ### CI concurrency
 
 The GitHub Actions workflow uses a concurrency group per pull request or branch and `cancel-in-progress: true`. Pushing a newer commit cancels any superseded run for that PR or branch. The PHP 8.2/8.3/8.4 matrix uses `fail-fast: false` so a test failure on one PHP version does not cancel diagnostics for the others.
+
+### Native Word table styles
+
+Define a reusable table style in the theme:
+
+```yaml
+twig_to_word:
+  themes:
+    default:
+      styles:
+        ReportTable:
+          type: table
+          table:
+            borderSize: 6
+            borderColor: '4472C4'
+          first_row:
+            bgColor: 'D9EAF7'
+```
+
+Apply it to HTML tables with `<table data-docx-style="ReportTable">...</table>`. The DOCX exports a named Word table style and a table reference to it. Invalid or unknown table style names are rejected.
+
+Character styles now also work with nested markup. For example, `<span data-docx-style="Important">Normal <em>emphasis</em> normal</span>` keeps native character-style references for the unchanged text while the emphasized segment receives the style's font properties and an italic override. This fallback is required because PHPWord's current run API does not combine a named character style and inline font overrides in one run.
