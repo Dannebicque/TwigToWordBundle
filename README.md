@@ -114,3 +114,7 @@ Insert a native Word table of contents in a Twig template:
 The DOCX contains a Word TOC field, not a static HTML listing. In Word, update the field/table of contents to refresh headings and page numbers after editing.
 
 Footer options `page_numbers: true` and `total_pages: true` produce `PAGE` and `NUMPAGES` fields. Use `first_page: true` on a header or footer configuration to target the first-page variant (requires the document's first-page header/footer setting in Word). Table cells accept HTML `colspan` and `rowspan`.
+
+## Word feature coverage
+
+See [Word / PHPWord / TwigToWordBundle feature matrix](docs/word-feature-matrix.md) for supported mappings, limitations, examples, and the prioritized roadmap.
